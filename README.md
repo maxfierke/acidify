@@ -1,6 +1,8 @@
 # Acidify by TeamAcid
 ## What is Acidify?
-Acidify is a tool for building Android builds. It allows easy switching between build types and setting up everything that is needed to build Android. It's designed by and for TeamAcid.
+Acidify is a tool for building Android builds. It allows easy switching between build types and setting up everything that is needed to build Android.
+
+That said, it is a tool designed for people that are already building Android but want to be able to switch between CM7, CM9, AOKP, etc. easily. It's primarily a convenience tool for TeamAcid developers.
 ## Can I use Acidify?
 Of course you can use Acidify! Be aware that it grabs manifests from us (TeamAcid) so in its unmodified states you'll only be able to build Android the way we build Android.
 ## What do I need to use Acidify?
