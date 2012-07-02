@@ -299,6 +299,7 @@ function update()
     rm $resdir/acidify
     printf "Fetching newest version from Github\n"
     curl https://raw.github.com/teamacid/acidify/master/acidify > $resdir/acidify
+    chmod +x $resdir/acidify
     printf "Updated to "
     $resdir/acidify version
 }
