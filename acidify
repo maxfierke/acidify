@@ -297,12 +297,12 @@ function update()
     
     printf "Removing "
     version
-    rm $resdir/acidify
+    rm $acidifydir/acidify
     printf "Fetching newest version from Github\n"
-    curl https://raw.github.com/teamacid/acidify/master/acidify > $resdir/acidify
-    chmod +x $resdir/acidify
+    curl https://raw.github.com/teamacid/acidify/master/acidify > $acidifydir/acidify
+    chmod +x $acidifydir/acidify
     printf "Updated to "
-    $resdir/acidify version
+    $acidifydir/acidify version
 }
 
 function usage()
