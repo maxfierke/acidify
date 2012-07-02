@@ -291,6 +291,18 @@ function sync()
     repo sync -j$DLJOBS
 }
 
+function update()
+{
+    
+    printf "Removing "
+    version
+    rm $resdir/acidify
+    printf "Fetching newest version from Github\n"
+    curl https://raw.github.com/teamacid/acidify/master/acidify > $resdir/acidify
+    printf "Updated to "
+    $resdir/acidify version
+}
+
 function usage()
 {
     printf "Usage: acidify [command] (build type)\n"
@@ -305,6 +317,7 @@ function usage()
     printf "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
     printf "\tupload\t\tUploads the latest build to goo.im\n"
     printf "\tsync\t\trepo sync\n"
+    printf "\tupdate\t\tUpdate acidify to the latest and greatest\n"
     printf "\n\n"
     printf "Available build types (case sensitive):\n"
     printf "\tcm7\t\tFor CyanogenMod 7\n"
