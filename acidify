@@ -1,0 +1,337 @@
+#!/bin/bash
+
+set -e
+
+MAJVERSION=0
+MINVERSION=1
+RELVERSION=1
+
+DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
+
+# Command line arguments
+arch=$(uname -m)
+if [ x"${ANDROID_BUILD_TOP}" = x"" ]
+then
+    resdir=$(dirname `readlink -f $0`)
+else
+    resdir=${ANDROID_BUILD_TOP}
+fi
+command="${1}"
+arg="${2}"
+
+device=galaxys4gmtd
+
+# Utility Functions
+function error()
+{
+    abort_msg "============== Error!!! ==============\n${@}"
+    exit 1
+}
+
+function abort_msg()
+{
+    printf "${@}\n"
+    abort
+}
+
+function abort()
+{
+    exit 1
+}
+
+function setbuildtype()
+{
+    buildtype="${@}"
+    
+    if [ ! -f $resdir/.acidify ]
+    then
+        mkdir -p $resdir/.acidify
+    fi
+
+    echo $buildtype > $resdir/.acidify/buildtype || error "Could not write to ~/.acidify !\n"
+}
+
+function aptgetreq()
+{
+    . /etc/lsb-release
+    case $DISTRIB_CODENAME in
+        precise)
+            sudo apt-get install git-core gnupg flex bison gperf build-essential \
+                zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev \
+                libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \
+                libgl1-mesa-dev g++-multilib mingw32 openjdk-6-jdk tofrodos \
+                python-markdown libxml2-utils xsltproc zlib1g-dev:i386
+            sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+            ;;
+        oneiric)
+            sudo apt-get install git-core gnupg flex bison gperf build-essential \
+                zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
+                x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
+                libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
+                libxml2-utils xsltproc openjdk-6-jdk
+            sudo apt-get install libx11-dev:i386
+            ;;
+        natty)
+            sudo apt-get install git-core gnupg flex bison gperf build-essential \
+                zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
+                x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
+                libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
+                libxml2-utils xsltproc openjdk-6-jdk
+            ;;
+        maverick)
+            sudo apt-get install git-core gnupg flex bison gperf build-essential \
+                zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
+                x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
+                libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
+                libxml2-utils xsltproc openjdk-6-jdk
+            sudo ln -s /usr/lib32/mesa/libGL.so.1 /usr/lib32/mesa/libGL.so
+            ;;
+        lucid)
+            sudo apt-get install git-core gnupg flex bison gperf build-essential \
+                zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
+                x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
+                libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
+                libxml2-utils xsltproc openjdk-6-jdk
+            ;;
+        *)
+            error "Your version of Ubuntu is unsupported!\n"
+            ;;
+    esac
+}
+
+function installreqpackages()
+{
+    . /etc/lsb-release
+    case $DISTRIB_ID in
+        Ubuntu)
+            aptgetreq
+            ;;
+        *)
+            error "$DISTRIB_ID is unsupported by this script!\nRefer to " \
+            "the building Android guide for $DISTRIB_ID\n" \
+            "to determine what packages you need"
+            ;;
+    esac
+}
+
+function checkenv()
+{
+    command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
+}
+
+function switchmanifest()
+{
+	if [ -f $resdir/.repo/local_manifest.xml ]
+	then
+		printf "Removing old local manifest\n"
+		rm $resdir/.repo/local_manifest.xml
+	fi
+	printf "Fetching $buildtype local manifest\n"
+	curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml || error "Failed to fetch $buildtype local manifest!\n"
+}
+
+# Usable Functions
+
+function setup()
+{
+    mkdir -p ~/bin
+    printf "Fetching the latest version of repo\n"
+    curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
+    chmod a+x ~/bin/repo
+    
+    printf "Installing required packages for building Android\n"
+    installreqpackages
+    
+    printf "Your machine is ready to setup the Android build environment\n"
+    printf "Please see http://source.android.com/source/initializing.html for\n"
+    "instructions on setting up ADB and the udev rules required.\n"
+}
+
+function init()
+{
+    case $arg in
+        aokp)
+            setbuildtype "AOKP"
+            repo init -u https://github.com/AOKP/platform_manifest.git -b ics
+            switchmanifest
+            repo sync -j$DLJOBS -f
+            ;;
+        cm7)
+            setbuildtype "CM7"
+            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
+            switchmanifest
+            repo sync -j$DLJOBS -f
+            ;;
+        cm9)
+            setbuildtype "CM9"
+            repo init -u https://github.com/CyanogenMod/android.git -b ics
+            switchmanifest
+            repo sync -j$DLJOBS -f
+            ;;
+        *)
+            printf "That configuration does not exist!\n"
+            abort
+            ;;
+    esac
+}
+
+function eatbreakfast()
+{
+    checkenv
+    eatlunch
+}
+
+function config()
+{
+    checkenv
+    case $buildtype in
+        AOKP)
+            lunch aokp_$device-userdebug
+            ;;
+        CM9)
+            lunch cm_$device-userdebug
+            ;;
+        CM7)
+            lunch cyanogen_$device-eng
+            ;;
+        *)
+            error "Invalid build type!\n"
+            ;;
+    esac
+}
+
+function eatbrunch()
+{
+    checkenv
+    eatbreakfast
+    eatbacon
+}
+
+function build()
+{
+    checkenv
+    mka bacon
+}
+
+function clean()
+{
+    make clobber
+}
+
+function release()
+{
+    clean
+    eatbrunch
+}
+
+function deploy()
+{
+    command -v adb >/dev/null 2>&1 || error "ADB is not installed, so I can not deploy!\n"
+    BUILD_DATE=$(date -u +%Y%m%d)
+    printf "Removing old build(s)!"
+    adb shell rm /sdcard/cm-9-*.zip
+    printf "Pushing new build!"
+    case $buildtype in
+        AOKP)
+            # AOKP is annoying about naming its builds
+            # Someone that builds for AOKP should definitely fix this
+            AOKP_BUILD=40
+            device_build=$device"_build"
+            adb push out/target/product/galaxys4gmtd/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
+            ;;
+        CM9)
+            adb push out/target/product/galaxys4gmtd/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            ;;
+        CM7)
+            adb push out/target/product/galaxys4gmtd/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            ;;
+        *)
+            error "Not a valid build type!\n"
+            ;;
+    esac
+    printf "Operation completed (hopefully successfully)\n"
+    printf "Waiting for Android device...\n"
+    adb wait-for-device
+    printf "Rebooting to recovery..."
+    adb reboot recovery
+}
+
+function usage()
+{
+    printf "Usage: acidify [command] (build type)\n"
+    printf "\n"
+    printf "Commands:\n"
+    printf "\tsetup\t\tFetches required packages in additon to repo for building Android\n"
+    printf "\tinit\t\tInitializes the build environment to build the type specified in the argument\n"
+    printf "\tconfig\t\tConfigures the build environment for $device\n"
+    printf "\tbacon\t\tBuilds a build for the $device (same as mka bacon)\n"
+    printf "\tclean\t\tCleans the build environment\n"
+    printf "\trelease\t\tCompiles a clean build for the $device\n"
+    printf "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
+    printf "\n\n"
+    printf "Available build types (case sensitive):\n"
+    printf "\tcm7\t\tFor CyanogenMod 7\n"
+    printf "\tcm9\t\tFor CyanogenMod 9\n"
+    printf "\taokp\t\tFor Android Open Kang Project\n"
+    abort
+}
+
+function version()
+{
+    printf "Acidify version $MAJVERSION.$MINVERSION.$RELVERSION\n"
+}
+
+function main()
+{
+	version
+	
+	mkdir -p $resdir/.acidify
+	
+	case $command in
+	    setup)
+	        setup
+	        ;;
+	    init)
+	        init
+	        ;;
+		build)
+		    build
+		    ;;
+		release)
+		    release
+		    ;;
+		clean)
+		    clean
+		    ;;
+		deploy)
+		    deploy
+		    ;;
+		version)
+		    version
+		    ;;
+		*)
+			usage
+			;;
+	esac
+}
+
+if [ x"${command}" = x"" ]
+then
+    printf "============== Error!!! ==============\nYou must supply a command!\n"
+    usage
+fi
+if [ x"${arch}" != x"x86_64" ]
+then
+    error "Only 64-bit machines are supported!\n"
+fi
+if [ -f $resdir/.acidify/buildtype ]
+then
+    buildtype=$(cat $resdir/.acidify/buildtype)
+else
+    setbuildtype "CM9" # CM9 is what is actively being developed. Let's make it the default.
+fi
+
+main
+
+# vi: ts=4:sw=4:et:ai
+
