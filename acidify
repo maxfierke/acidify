@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=1
-RELVERSION=1
+RELVERSION=3
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 
@@ -231,9 +231,9 @@ function deploy()
 {
     command -v adb >/dev/null 2>&1 || error "ADB is not installed, so I can not deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
-    printf "Removing old build(s)!"
+    printf "Removing old build(s)!\n"
     adb shell rm /sdcard/cm-9-*.zip
-    printf "Pushing new build!"
+    printf "Pushing new build!\n"
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
