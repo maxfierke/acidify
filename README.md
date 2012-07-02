@@ -8,8 +8,10 @@ Of course you can use Acidify! Be aware that it grabs manifests from us (TeamAci
 ## What do I need to use Acidify?
 Currently, you need a machine running version 10.10 of Ubuntu or higher to use every feature available in Acidify. Until people contribute code aimed at other distributions and versions, some features may be unavailable.
 The core features such as initializing the build environment, switching between build types, or building Android itself should theoretically work on any platform running bash and which has all the packages installed that are required to build Android.
+## How do I install Acidify
+Download a tarball of acidify or clone the repository. Next, put acidify in your PATH. Do this either by putting somewhere already in your PATH (such as ~/bin on many setups), or adding the directory you downloaded or cloned acidify into to your PATH.
 ## How do I use Acidify?
-Run <code>./acidify usage</code> for an explaination on how Acidify may be used.
+Run <code>acidify usage</code> for an explaination on how Acidify may be used.
 ## Can I modify or redistribute Acidify?
 Yes, you can! Acidify is licensed under the GNU General Public License version 3 (or greater). You can modify it and redistribute it under the terms of the license.
 See LICENSE for more information.
