@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=1
-RELVERSION=4
+RELVERSION=5
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 
