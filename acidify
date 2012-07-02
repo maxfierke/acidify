@@ -20,6 +20,7 @@ command="${1}"
 arg="${2}"
 
 device=galaxys4gmtd
+gooUser=TeamAcid
 
 # Utility Functions
 function error()
@@ -256,6 +257,33 @@ function deploy()
     adb reboot recovery
 }
 
+function upload()
+{
+    goodir=$(echo $buildtype | tr '[:upper:]' '[:lower:]')
+    case $buildtype in
+        AOKP)
+            # AOKP is annoying about naming its builds
+            # Someone that builds for AOKP should definitely fix this
+            AOKP_BUILD=40
+            device_build=$device"_build"
+            printf "Uploading to goo.im\n"
+            scp -P 2222 out/target/product/galaxys4gmtd/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            ;;
+        CM9)
+            printf "Uploading to goo.im\n"
+            scp -P 2222 out/target/product/galaxys4gmtd/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            ;;
+        CM7)
+            printf "Uploading to goo.im\n"
+            scp -P 2222 out/target/product/galaxys4gmtd/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            ;;
+        *)
+            error "Not a valid build type!\n"
+            ;;
+    esac
+    printf "Uploaded latest build to goo.im"
+}
+
 function usage()
 {
     printf "Usage: acidify [command] (build type)\n"
@@ -268,6 +296,7 @@ function usage()
     printf "\tclean\t\tCleans the build environment\n"
     printf "\trelease\t\tCompiles a clean build for the $device\n"
     printf "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
+    printf "\tupload\t\tUploads the latest build to goo.im\n"
     printf "\n\n"
     printf "Available build types (case sensitive):\n"
     printf "\tcm7\t\tFor CyanogenMod 7\n"
@@ -305,6 +334,9 @@ function main()
 		    ;;
 		deploy)
 		    deploy
+		    ;;
+		upload)
+		    upload
 		    ;;
 		version)
 		    version
