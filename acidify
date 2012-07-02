@@ -359,6 +359,12 @@ function main()
 		upload)
 		    upload
 		    ;;
+		sync)
+		    sync
+		    ;;
+		update)
+		    update
+		    ;;
 		version)
 		    version
 		    ;;
