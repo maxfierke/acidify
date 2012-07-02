@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=1
-RELVERSION=3
+RELVERSION=4
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 
@@ -240,13 +240,13 @@ function deploy()
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=40
             device_build=$device"_build"
-            adb push out/target/product/galaxys4gmtd/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
+            adb push out/target/product/$device/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
             ;;
         CM9)
-            adb push out/target/product/galaxys4gmtd/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            adb push out/target/product/$device/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
             ;;
         CM7)
-            adb push out/target/product/galaxys4gmtd/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            adb push out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
             ;;
         *)
             error "Not a valid build type!\n"
@@ -269,15 +269,15 @@ function upload()
             AOKP_BUILD=40
             device_build=$device"_build"
             printf "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/galaxys4gmtd/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$device/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         CM9)
             printf "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/galaxys4gmtd/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$device/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         CM7)
             printf "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/galaxys4gmtd/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         *)
             error "Not a valid build type!\n"
