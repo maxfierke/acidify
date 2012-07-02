@@ -10,9 +10,10 @@ DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 
 # Command line arguments
 arch=$(uname -m)
+acidifydir=$(dirname `readlink -f $0`)
 if [ x"${ANDROID_BUILD_TOP}" = x"" ]
 then
-    resdir=$(dirname `readlink -f $0`)
+    resdir=`pwd`
 else
     resdir=${ANDROID_BUILD_TOP}
 fi
@@ -255,7 +256,7 @@ function deploy()
     printf "Operation completed (hopefully successfully)\n"
     printf "Waiting for Android device...\n"
     adb wait-for-device
-    printf "Rebooting to recovery..."
+    printf "Rebooting to recovery...\n"
     adb reboot recovery
 }
 
