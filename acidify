@@ -162,12 +162,14 @@ function init()
             repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
             switchmanifest
             repo sync -j$DLJOBS -f
+            $resdir/vendor/cyanogen/get-rommanager
             ;;
         cm9)
             setbuildtype "CM9"
             repo init -u https://github.com/CyanogenMod/android.git -b ics
             switchmanifest
             repo sync -j$DLJOBS -f
+            $resdir/vendor/cm/get-prebuilts
             ;;
         *)
             printf "That configuration does not exist!\n"
