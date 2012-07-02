@@ -4,10 +4,10 @@ set -e
 
 MAJVERSION=0
 MINVERSION=1
-RELVERSION=6
+RELVERSION=8
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
-
+export PATH="~/bin:$PATH"
 # Command line arguments
 arch=$(uname -m)
 acidifydir=$(dirname `readlink -f $0`)
@@ -151,24 +151,52 @@ function setup()
 
 function init()
 {
+    command -v repo >/dev/null 2>&1 || error "You don't have the repo utility!\nRun 'acidify setup' to correct this.\n"
     case $arg in
         aokp)
             setbuildtype "AOKP"
-            repo init -u https://github.com/AOKP/platform_manifest.git -b ics
+            if [ -f $resdir/android ]
+            then
+                rm -rf $resdir/android
+            fi
+            if [ -f $resdir/platform_manifest ]
+            then
+                rm -rf $resdir/platform_manifest
+            fi
             switchmanifest
+            printf "Initializing repository\n"
+            repo init -u https://github.com/AOKP/platform_manifest.git -b ics
             repo sync -j$DLJOBS -f
             ;;
         cm7)
             setbuildtype "CM7"
-            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
+            if [ -f $resdir/android ]
+            then
+                rm -rf $resdir/android
+            fi
+            if [ -f $resdir/platform_manifest ]
+            then
+                rm -rf $resdir/platform_manifest
+            fi
             switchmanifest
+            printf "Initializing repository\n"
+            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread  
             repo sync -j$DLJOBS -f
             $resdir/vendor/cyanogen/get-rommanager
             ;;
         cm9)
             setbuildtype "CM9"
-            repo init -u https://github.com/CyanogenMod/android.git -b ics
+            if [ -f $resdir/android ]
+            then
+                rm -rf $resdir/android
+            fi
+            if [ -f $resdir/platform_manifest ]
+            then
+                rm -rf $resdir/platform_manifest
+            fi
             switchmanifest
+            printf "Initializing repository\n"
+            repo init -u https://github.com/CyanogenMod/android.git -b ics
             repo sync -j$DLJOBS -f
             $resdir/vendor/cm/get-prebuilts
             ;;
@@ -218,7 +246,7 @@ function release()
 
 function deploy()
 {
-    command -v adb >/dev/null 2>&1 || error "ADB is not installed, so I can not deploy!\n"
+    command -v adb >/dev/null 2>&1 || error "ADB is not installed/in your PATH, so I can not deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
     printf "Removing old build(s)!\n"
     adb shell rm /sdcard/cm-9-*.zip
