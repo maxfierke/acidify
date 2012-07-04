@@ -3,8 +3,8 @@
 set -e
 
 MAJVERSION=0
-MINVERSION=1
-RELVERSION=8
+MINVERSION=2
+RELVERSION=0
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
@@ -45,7 +45,7 @@ function setbuildtype()
 {
     buildtype="${@}"
     
-    if [ ! -f $resdir/.acidify ]
+    if [ ! -d $resdir/.acidify ]
     then
         mkdir -p $resdir/.acidify
     fi
@@ -249,6 +249,7 @@ function config()
 function build()
 {
     checkenv
+    config
     mka bacon
 }
 
@@ -336,7 +337,6 @@ function sync()
 
 function update()
 {
-    
     printf "Removing "
     version
     rm $acidifydir/acidify
@@ -355,7 +355,7 @@ function usage()
     printf "\tsetup\t\tFetches required packages in additon to repo for building Android\n"
     printf "\tinit\t\tInitializes the build environment to build the type specified in the argument\n"
     printf "\tconfig\t\tConfigures the build environment for $device\n"
-    printf "\tbacon\t\tBuilds a build for the $device (same as mka bacon)\n"
+    printf "\tbuild\t\tBuilds a build for the $device (same as mka bacon)\n"
     printf "\tclean\t\tCleans the build environment\n"
     printf "\trelease\t\tCompiles a clean build for the $device\n"
     printf "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
@@ -377,45 +377,48 @@ function version()
 
 function main()
 {
-	version
+    version
 	
-	mkdir -p $resdir/.acidify
+    mkdir -p $resdir/.acidify
 	
-	case $command in
-	    setup)
-	        setup
-	        ;;
-	    init)
+    case $command in
+        setup)
+            setup
+            ;;
+        init)
 	        init
 	        ;;
-		build)
-		    build
-		    ;;
-		release)
-		    release
-		    ;;
-		clean)
-		    clean
-		    ;;
-		deploy)
-		    deploy
-		    ;;
-		upload)
-		    upload
-		    ;;
-		sync)
-		    sync
-		    ;;
-		update)
-		    update
-		    ;;
-		version)
-		    version
-		    ;;
-		*)
-			usage
-			;;
-	esac
+        config)
+            config
+            ;;
+        build)
+	        build
+            ;;
+        release)
+            release
+            ;;
+        clean)
+            clean
+            ;;
+        deploy)
+            deploy
+            ;;
+        upload)
+            upload
+            ;;
+        sync)
+            sync
+            ;;
+        update)
+            update
+            ;;
+        version)
+            version
+            ;;
+        *)
+            usage
+            ;;
+    esac
 }
 
 if [ x"${command}" = x"" ]
@@ -436,5 +439,5 @@ fi
 
 main
 
-# vi: ts=4:sw=4:et:ai
+# vim :set ts=4 sw=4 sts=4 et :
 
