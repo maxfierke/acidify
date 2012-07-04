@@ -123,10 +123,8 @@ function checkenv()
 
 function cleanenv()
 {
-    if [ ${ANDROID_BUILD_TOP} != $resdir ]
-    then
-        make clobber
-    fi
+    checkenv
+    make clobber
     if [ -d $resdir/android ]
     then
         printf "Removing $resdir/android\n"
@@ -328,7 +326,7 @@ function upload()
             error "Not a valid build type!\n"
             ;;
     esac
-    printf "Uploaded latest build to goo.im"
+    printf "Uploaded latest build to goo.im\n"
 }
 
 function sync()
