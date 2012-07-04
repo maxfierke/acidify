@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=2
+RELVERSION=3
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
@@ -123,7 +123,13 @@ function installreqpackages()
 
 function checkenv()
 {
-    command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
+    if [ -f $resdir/build/envsetup.sh ]
+    then
+        command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
+    else
+        error "Error: Could not run envsetup.sh.\nHave you run " \
+        "acidify init yet?"
+    fi
 }
 
 function cleanenv()
