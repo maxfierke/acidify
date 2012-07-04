@@ -17,7 +17,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=4
+RELVERSION=5
 
 export PATH="~/bin:$PATH"
 
@@ -311,8 +311,17 @@ function config()
 
 function build()
 {
+    message "Building $buildtype\n"
     checkenv
     config
+    if [ "$buildtype" = "AOKP" ]
+    # Messy workaround for building AOKP. This will get fixed using a makefile
+    then
+      # Redundant call to bootimage so we can generate bml_over_mtd
+      mka bootimage
+        cp kernel/samsung/galaxys4gmtd/usr/galaxys4gmtd_initramfs_files/bml_over_mtd \
+        out/target/product/galaxys4gmtd/utilities/bml_over_mtd
+    fi
     mka bacon
 }
 
