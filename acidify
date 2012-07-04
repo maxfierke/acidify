@@ -10,6 +10,7 @@ DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
 # Command line arguments
 arch=$(uname -m)
+acidify_cmd=$0
 acidifydir=$(dirname `readlink -f $0`)
 if [ x"${ANDROID_BUILD_TOP}" = x"" ]
 then
@@ -169,7 +170,10 @@ function setup()
     printf "Fetching the latest version of repo\n"
     curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
     chmod a+x ~/bin/repo
-    
+
+    printf "Making Acidify available from any directory\n"
+    ln -s $acidify_cmd ~/bin/acidify
+
     printf "Installing required packages for building Android\n"
     installreqpackages
     
