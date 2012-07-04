@@ -7,6 +7,7 @@ That said, it is a tool designed for people that are already building Android bu
 Of course you can use Acidify! Be aware that it grabs manifests from us (TeamAcid) so in its unmodified state you'll only be able to build Android the way we build Android. As of 0.2.4, however, there are configurable options that allow building for any device. Simply specify any local manifest URLs and the device name in the script.
 ## What do I need to use Acidify?
 **Short Answer:** A POSIX-compliant machine with bash which is capable of compiling Android.
+
 **Long Answer:** Currently, you need a machine running version 10.10 of Ubuntu or higher to use every *feature* available in Acidify. Until people contribute code aimed at other distributions and versions, some features (such as grabbing needed packages) may be unavailable. The core features such as initializing the build environment, switching between build types, or building Android itself should theoretically work on any platform running bash and which has all the packages installed that are required to build Android.
 ## How do I install Acidify
 Download a tarball of acidify or clone the repository. Put it somewhere safe and run <code>acidify setup</code>. That will install all the required packages for building Android (if you're on Ubuntu) and it will create a soft link to acidify in ~/bin so that you can access acidify from any directory (assuming ~/bin is in your PATH).
