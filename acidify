@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=0
+RELVERSION=1
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
@@ -306,6 +306,7 @@ function deploy()
 function upload()
 {
     goodir=$(echo $buildtype | tr '[:upper:]' '[:lower:]')
+    BUILD_DATE=$(date -u +%Y%m%d)
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
