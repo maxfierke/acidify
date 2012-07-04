@@ -121,15 +121,42 @@ function checkenv()
     command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
 }
 
-function switchmanifest()
+function cleanenv()
 {
-	if [ -f $resdir/.repo/local_manifest.xml ]
-	then
-		printf "Removing old local manifest\n"
-		rm $resdir/.repo/local_manifest.xml
-	fi
-	printf "Fetching $buildtype local manifest\n"
-	curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml || error "Failed to fetch $buildtype local manifest!\n"
+    if [ ${ANDROID_BUILD_TOP} != $resdir ]
+    then
+        make clobber
+    fi
+    if [ -d $resdir/android ]
+    then
+        printf "Removing $resdir/android\n"
+        rm -rf $resdir/android
+    fi
+    if [ -d $resdir/platform_manifest ]
+    then
+        printf "Removing $resdir/platform_manifest\n"
+        rm -rf $resdir/platform_manifest
+    fi
+    if [ -d $resdir/.repo/manifests ]
+    then
+        printf "Removing $resdir/.repo/manifests\n"
+        rm -rf $resdir/.repo/manifests
+    fi
+    if [ -d $resdir/.repo/manifests.git ]
+    then
+        printf "Removing $resdir/.repo/manifests.git\n"
+        rm -rf $resdir/.repo/manifests.git
+    fi
+    if [ -f $resdir/.repo/manifest.xml ]
+    then
+        printf "Removing $resdir/.repo/manifest.xml\n"
+        rm -f $resdir/.repo/manifest.xml
+    fi
+    if [ -f $resdir/.repo/local_manifest.xml ]
+    then
+        printf "Removing $resdir/.repo/local_manifest.xml\n"
+        rm -f $resdir/.repo/local_manifest.xml
+    fi
 }
 
 # Usable Functions
@@ -152,52 +179,45 @@ function setup()
 function init()
 {
     command -v repo >/dev/null 2>&1 || error "You don't have the repo utility!\nRun 'acidify setup' to correct this.\n"
+    printf "Attempting to initialize environment to build type $arg\n"
+    printf "This WILL REMOVE ALL LOCAL CHANGES\n"
     case $arg in
         aokp)
             setbuildtype "AOKP"
-            if [ -f $resdir/android ]
-            then
-                rm -rf $resdir/android
-            fi
-            if [ -f $resdir/platform_manifest ]
-            then
-                rm -rf $resdir/platform_manifest
-            fi
-            switchmanifest
+            cleanenv
             printf "Initializing repository\n"
             repo init -u https://github.com/AOKP/platform_manifest.git -b ics
-            repo sync -j$DLJOBS -f
+            printf "Fetching $buildtype local manifest from Github"
+            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            printf "Syncing changes with upstream\n"
+            repo sync -j$DLJOBS -f -d
+            printf "Starting all projects on task branch ics"
+            repo start --all ics
             ;;
         cm7)
             setbuildtype "CM7"
-            if [ -f $resdir/android ]
-            then
-                rm -rf $resdir/android
-            fi
-            if [ -f $resdir/platform_manifest ]
-            then
-                rm -rf $resdir/platform_manifest
-            fi
-            switchmanifest
+            cleanenv
             printf "Initializing repository\n"
-            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread  
-            repo sync -j$DLJOBS -f
+            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
+            printf "Fetching $buildtype local manifest from Github"
+            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            printf "Syncing changes with upstream\n"
+            repo sync -j$DLJOBS -f -d
+            printf "Starting all projects on task branch gingerbread"
+            repo start --all gingerbread
             $resdir/vendor/cyanogen/get-rommanager
             ;;
         cm9)
             setbuildtype "CM9"
-            if [ -f $resdir/android ]
-            then
-                rm -rf $resdir/android
-            fi
-            if [ -f $resdir/platform_manifest ]
-            then
-                rm -rf $resdir/platform_manifest
-            fi
-            switchmanifest
+            cleanenv
             printf "Initializing repository\n"
             repo init -u https://github.com/CyanogenMod/android.git -b ics
-            repo sync -j$DLJOBS -f
+            printf "Fetching $buildtype local manifest from Github"
+            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            printf "Syncing changes with upstream\n"
+            repo sync -j$DLJOBS -f -d
+            printf "Starting all projects on task branch ics"
+            repo start --all ics
             $resdir/vendor/cm/get-prebuilts
             ;;
         *)
