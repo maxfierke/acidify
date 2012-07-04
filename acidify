@@ -4,7 +4,7 @@ set -e
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=1
+RELVERSION=2
 
 DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
