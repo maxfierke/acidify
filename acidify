@@ -268,22 +268,28 @@ function deploy()
 {
     command -v adb >/dev/null 2>&1 || error "ADB is not installed/in your PATH, so I can not deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
-    printf "Removing old build(s)!\n"
-    adb shell rm /sdcard/cm-9-*.zip
-    printf "Pushing new build!\n"
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=40
             device_build=$device"_build"
+            printf "Removing old build(s)!\n"
+            adb shell rm /sdcard/aokp_$device*.zip
+            printf "Pushing new build!\n"
             adb push out/target/product/$device/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
             ;;
         CM9)
+            printf "Removing old build(s)!\n"
+            adb shell rm /sdcard/cm-9-*.zip
+            printf "Pushing new build!\n"
             adb push out/target/product/$device/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
             ;;
         CM7)
-            adb push out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            printf "Removing old build(s)!\n"
+            adb shell rm /sdcard/cm-7-*.zip
+            printf "Pushing new build!\n"
+            adb push out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip
             ;;
         *)
             error "Not a valid build type!\n"
