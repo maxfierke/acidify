@@ -123,8 +123,12 @@ function checkenv()
 
 function cleanenv()
 {
-    checkenv
-    make clobber
+    
+    if [ -f $resdir/build/envsetup.sh ]
+    then
+        checkenv
+        make clobber
+    fi
     if [ -d $resdir/android ]
     then
         printf "Removing $resdir/android\n"
