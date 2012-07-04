@@ -17,7 +17,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=5
+RELVERSION=6
 
 export PATH="~/bin:$PATH"
 
@@ -40,13 +40,7 @@ arg="${2}"
 # Utility Functions
 function error()
 {
-    abort_msg "============== Error!!! ==============\n${@}"
-    exit 1
-}
-
-function abort_msg()
-{
-    message "${@}\n"
+    echo -en "Error: ${*}" | color red
     abort
 }
 
@@ -177,12 +171,16 @@ function color()
     # make the color bold
     BOLD=1\;
 
+    function red {
+        COLOR=31
+    }
+
     function green {
-       COLOR=32
+        COLOR=32
     }
 
     function yellow {
-       COLOR=33
+        COLOR=33
     }
 
     while (($#));
@@ -272,7 +270,7 @@ function init()
             $resdir/vendor/cm/get-prebuilts
             ;;
         *)
-            message "That configuration does not exist!\n"
+            error "That configuration does not exist!\n"
             abort
             ;;
     esac
