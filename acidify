@@ -132,50 +132,41 @@ function installreqpackages()
 
 function checkenv()
 {
-    if [ -f $resdir/build/envsetup.sh ]
-    then
+    if [ -f $resdir/build/envsetup.sh ]; then
         command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
     else
-        error "Error: Could not run envsetup.sh.\nHave you run " \
+        error "Could not run envsetup.sh.\nHave you run " \
         "acidify init yet?"
     fi
 }
 
 function cleanenv()
 {
-    
-    if [ -f $resdir/build/envsetup.sh ]
-    then
+    if [ -f $resdir/build/envsetup.sh ]; then
         checkenv
         make clobber
     fi
-    if [ -d $resdir/android ]
-    then
+    if [ -d $resdir/android ]; then
         message "Removing $resdir/android\n"
         rm -rf $resdir/android
     fi
-    if [ -d $resdir/platform_manifest ]
-    then
+    if [ -d $resdir/platform_manifest ]; then
         message "Removing $resdir/platform_manifest\n"
         rm -rf $resdir/platform_manifest
     fi
-    if [ -d $resdir/.repo/manifests ]
-    then
+    if [ -d $resdir/.repo/manifests ]; then
         message "Removing $resdir/.repo/manifests\n"
         rm -rf $resdir/.repo/manifests
     fi
-    if [ -d $resdir/.repo/manifests.git ]
-    then
+    if [ -d $resdir/.repo/manifests.git ]; then
         message "Removing $resdir/.repo/manifests.git\n"
         rm -rf $resdir/.repo/manifests.git
     fi
-    if [ -f $resdir/.repo/manifest.xml ]
-    then
+    if [ -f $resdir/.repo/manifest.xml ]; then
         message "Removing $resdir/.repo/manifest.xml\n"
         rm -f $resdir/.repo/manifest.xml
     fi
-    if [ -f $resdir/.repo/local_manifest.xml ]
-    then
+    if [ -f $resdir/.repo/local_manifest.xml ]; then
         message "Removing $resdir/.repo/local_manifest.xml\n"
         rm -f $resdir/.repo/local_manifest.xml
     fi
@@ -241,8 +232,7 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/AOKP/platform_manifest.git -b ics
-            if [ x"$LM_AOKP" != x"" ]
-            then
+            if [ x"$LM_AOKP" != x"" ]; then
                 message "Fetching $buildtype local manifest"
                 curl $LM_AOKP > $resdir/.repo/local_manifest.xml
             fi
@@ -256,8 +246,7 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
-            if [ x"$LM_CM7" != x"" ]
-            then
+            if [ x"$LM_CM7" != x"" ]; then
                 message "Fetching $buildtype local manifest"
                 curl $LM_CM7 > $resdir/.repo/local_manifest.xml
             fi
@@ -272,8 +261,7 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/CyanogenMod/android.git -b ics
-            if [ x"$LM_CM9" != x"" ]
-            then
+            if [ x"$LM_CM9" != x"" ]; then
                 message "Fetching $buildtype local manifest"
                 curl $LM_CM9 > $resdir/.repo/local_manifest.xml
             fi
@@ -314,11 +302,10 @@ function build()
     message "Building $buildtype\n"
     checkenv
     config
-    if [ "$buildtype" = "AOKP" ]
-    # Messy workaround for building AOKP. This will get fixed using a makefile
-    then
-      # Redundant call to bootimage so we can generate bml_over_mtd
-      mka bootimage
+    if [ "$buildtype" = "AOKP" ]; then
+        # Messy workaround for building AOKP. This will get fixed using a makefile
+        # Redundant call to bootimage so we can generate bml_over_mtd
+        mka bootimage
         cp kernel/samsung/galaxys4gmtd/usr/galaxys4gmtd_initramfs_files/bml_over_mtd \
         out/target/product/galaxys4gmtd/utilities/bml_over_mtd
     fi
@@ -501,7 +488,6 @@ function main()
             update
             ;;
         version)
-            version
             ;;
         *)
             usage
@@ -509,22 +495,21 @@ function main()
     esac
 }
 
-if [ x"${command}" = x"" ]
-then
-    message "============== Error!!! ==============\nYou must supply a command!\n"
+if [ x"${command}" = x"" ]; then
+    error "You must supply a command!\n"
     usage
 fi
-if [ x"${arch}" != x"x86_64" ]
-then
+if [ x"${arch}" != x"x86_64" ]; then
     error "Only 64-bit machines are supported!\n"
 fi
-if [ -f $resdir/.acidify/buildtype ]
-then
+if [ -f $resdir/.acidify/buildtype ]; then
     buildtype=$(cat $resdir/.acidify/buildtype)
 else
     setbuildtype "CM9" # CM9 is what is actively being developed. Let's make it the default.
 fi
 main
-timer
+if [ ! x"${command}" = x"version" -o x"${command}" = x"" ]; then
+    timer
+fi
 
 # vim :set ts=4 sw=4 sts=4 et :
