@@ -2,11 +2,23 @@
 
 set -e
 
+## CONFIGURATION
+# Local Manifest Configuration (these can be blank if you're not using local manifests)
+LM_AOKP="http://teamacid.github.com/AOKP/local_manifest.xml"
+LM_CM7="http://teamacid.github.com/CM7/local_manifest.xml"
+LM_CM9="http://teamacid.github.com/CM9/local_manifest.xml"
+# Repo Configuration
+DLJOBS=4                           # number of concurrent downloads
+# Device Configuration
+DEVICE=galaxys4gmtd
+# User Configuration
+GOOUSER=TeamAcid
+## END CONFIGURATION
+
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=3
+RELVERSION=4
 
-DLJOBS=4 # number of concurrent downloads (more than 6 may be detrimental)
 export PATH="~/bin:$PATH"
 
 # Start the timer
@@ -24,9 +36,6 @@ else
 fi
 command="${1}"
 arg="${2}"
-
-device=galaxys4gmtd
-gooUser=TeamAcid
 
 # Utility Functions
 function error()
@@ -55,7 +64,7 @@ function setbuildtype()
         mkdir -p $resdir/.acidify
     fi
 
-    echo $buildtype > $resdir/.acidify/buildtype || error "Could not write to ~/.acidify !\n"
+    echo $buildtype > $resdir/.acidify/buildtype || error "Could not write to $resdir/.acidify !\n"
 }
 
 function aptgetreq()
@@ -232,8 +241,11 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/AOKP/platform_manifest.git -b ics
-            message "Fetching $buildtype local manifest from Github"
-            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            if [ x"$LM_AOKP" != x"" ]
+            then
+                message "Fetching $buildtype local manifest"
+                curl $LM_AOKP > $resdir/.repo/local_manifest.xml
+            fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
             message "Starting all projects on task branch ics"
@@ -244,8 +256,11 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
-            message "Fetching $buildtype local manifest from Github"
-            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            if [ x"$LM_CM7" != x"" ]
+            then
+                message "Fetching $buildtype local manifest"
+                curl $LM_CM7 > $resdir/.repo/local_manifest.xml
+            fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
             message "Starting all projects on task branch gingerbread"
@@ -257,8 +272,11 @@ function init()
             cleanenv
             message "Initializing repository\n"
             repo init -u https://github.com/CyanogenMod/android.git -b ics
-            message "Fetching $buildtype local manifest from Github"
-            curl http://teamacid.github.com/$buildtype/local_manifest.xml > $resdir/.repo/local_manifest.xml
+            if [ x"$LM_CM9" != x"" ]
+            then
+                message "Fetching $buildtype local manifest"
+                curl $LM_CM9 > $resdir/.repo/local_manifest.xml
+            fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
             message "Starting all projects on task branch ics"
@@ -277,13 +295,13 @@ function config()
     checkenv
     case $buildtype in
         AOKP)
-            lunch aokp_$device-userdebug
+            lunch aokp_$DEVICE-userdebug
             ;;
         CM9)
-            lunch cm_$device-userdebug
+            lunch cm_$DEVICE-userdebug
             ;;
         CM7)
-            lunch cyanogen_$device-eng
+            lunch cyanogen_$DEVICE-eng
             ;;
         *)
             error "Invalid build type!\n"
@@ -319,23 +337,23 @@ function deploy()
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=40
-            device_build=$device"_build"
+            device_build=$DEVICE"_build"
             message "Removing old build(s)!\n"
-            adb shell rm /sdcard/aokp_$device*.zip
+            adb shell rm /sdcard/aokp_$DEVICE*.zip
             message "Pushing new build!\n"
-            adb push out/target/product/$device/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
+            adb push out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
             ;;
         CM9)
             message "Removing old build(s)!\n"
             adb shell rm /sdcard/cm-9-*.zip
             message "Pushing new build!\n"
-            adb push out/target/product/$device/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip
+            adb push out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
         CM7)
             message "Removing old build(s)!\n"
             adb shell rm /sdcard/cm-7-*.zip
             message "Pushing new build!\n"
-            adb push out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip /sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip
+            adb push out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip /sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
         *)
             error "Not a valid build type!\n"
@@ -357,17 +375,17 @@ function upload()
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=40
-            device_build=$device"_build"
+            device_build=$DEVICE"_build"
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$device/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         CM9)
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$device/cm-9-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         CM7)
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$device/cm-7-$BUILD_DATE-UNOFFICIAL-$device.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $gooUser@upload.goo.im:~/public_html/$goodir/
             ;;
         *)
             error "Not a valid build type!\n"
@@ -415,10 +433,10 @@ function usage()
     message "Commands:\n"
     message "\tsetup\t\tFetches required packages in additon to repo for building Android\n"
     message "\tinit\t\tInitializes the build environment to build the type specified in the argument\n"
-    message "\tconfig\t\tConfigures the build environment for $device\n"
-    message "\tbuild\t\tBuilds a build for the $device (same as mka bacon)\n"
+    message "\tconfig\t\tConfigures the build environment for $DEVICE\n"
+    message "\tbuild\t\tBuilds a build for the $DEVICE (same as mka bacon)\n"
     message "\tclean\t\tCleans the build environment\n"
-    message "\trelease\t\tCompiles a clean build for the $device\n"
+    message "\trelease\t\tCompiles a clean build for the $DEVICE\n"
     message "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
     message "\tupload\t\tUploads the latest build to goo.im\n"
     message "\tsync\t\trepo sync\n"
