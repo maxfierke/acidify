@@ -71,7 +71,8 @@ function aptgetreq()
                 zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev \
                 libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \
                 libgl1-mesa-dev g++-multilib mingw32 openjdk-6-jdk tofrodos \
-                python-markdown libxml2-utils xsltproc zlib1g-dev:i386 schedtool
+                python-markdown libxml2-utils xsltproc zlib1g-dev:i386 schedtool \
+                pngcrush
             sudo ln -fs /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
             ;;
         oneiric)
@@ -79,7 +80,8 @@ function aptgetreq()
                 zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
                 x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
                 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
-                libxml2-utils xsltproc openjdk-6-jdk schedtool
+                libxml2-utils xsltproc openjdk-6-jdk schedtool \
+                pngcrush
             sudo apt-get install libx11-dev:i386
             ;;
         natty)
@@ -87,14 +89,14 @@ function aptgetreq()
                 zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
                 x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
                 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
-                libxml2-utils xsltproc openjdk-6-jdk schedtool
+                libxml2-utils xsltproc openjdk-6-jdk schedtool pngcrush
             ;;
         maverick)
             sudo apt-get install git-core gnupg flex bison gperf build-essential \
                 zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
                 x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
                 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
-                libxml2-utils xsltproc openjdk-6-jdk schedtool
+                libxml2-utils xsltproc openjdk-6-jdk schedtool pngcrush
             sudo ln -fs /usr/lib32/mesa/libGL.so.1 /usr/lib32/mesa/libGL.so
             ;;
         lucid)
@@ -102,7 +104,7 @@ function aptgetreq()
                 zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \
                 x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \
                 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
-                libxml2-utils xsltproc openjdk-6-jdk schedtool
+                libxml2-utils xsltproc openjdk-6-jdk schedtool pngcrush
             ;;
         *)
             error "Your version of Ubuntu is unsupported!\n"
