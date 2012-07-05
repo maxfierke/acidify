@@ -10,6 +10,7 @@ LM_CM9="http://teamacid.github.com/CM9/local_manifest.xml"
 # Repo Configuration
 DLJOBS=4                           # number of concurrent downloads
 # Device Configuration
+MANUFACTURER=samsung
 DEVICE=galaxys4gmtd
 # User Configuration
 GOOUSER=TeamAcid
@@ -17,7 +18,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=7
+RELVERSION=8
 
 export PATH="~/bin:$PATH"
 
@@ -139,6 +140,11 @@ function cleanenv()
     if [ -f $resdir/build/envsetup.sh ]; then
         checkenv
         make clobber
+    fi
+    if [ -d $resdir/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $resdir/kernel/$MANUFACTURER/$DEVICE
+        make distclean
+        cd $resdir
     fi
     if [ -d $resdir/android ]; then
         message "Removing $resdir/android\n"
@@ -315,8 +321,10 @@ function build()
 
 function clean()
 {
-    if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
-        $resdir/kernel/samsung/galaxys4gmtd/build.sh distclean
+    if [ -d $resdir/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $resdir/kernel/$MANUFACTURER/$DEVICE
+        make distclean
+        cd $resdir
     fi
     make clobber
 }
