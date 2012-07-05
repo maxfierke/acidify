@@ -17,7 +17,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=6
+RELVERSION=7
 
 export PATH="~/bin:$PATH"
 
@@ -300,25 +300,30 @@ function build()
     message "Building $buildtype\n"
     checkenv
     config
-    if [ "$buildtype" = "AOKP" ]; then
+    if [ "$buildtype" = "AOKP" -a "$DEVICE" = "galaxys4gmtd" ]; then
         # Messy workaround for building AOKP. This will get fixed using a makefile
         # Redundant call to bootimage so we can generate bml_over_mtd
         mka bootimage
         cp kernel/samsung/galaxys4gmtd/usr/galaxys4gmtd_initramfs_files/bml_over_mtd \
         out/target/product/galaxys4gmtd/utilities/bml_over_mtd
     fi
+    if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
+        $resdir/kernel/samsung/galaxys4gmtd/build.sh build
+    fi
     mka bacon
 }
 
 function clean()
 {
+    if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
+        $resdir/kernel/samsung/galaxys4gmtd/build.sh distclean
+    fi
     make clobber
 }
 
 function release()
 {
     clean
-    config
     build
 }
 
@@ -433,7 +438,7 @@ function usage()
     message "\trelease\t\tCompiles a clean build for the $DEVICE\n"
     message "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
     message "\tupload\t\tUploads the latest build to goo.im\n"
-    message "\tsync\t\trepo sync\n"
+    message "\tsync\t\tSyncs the latest changes from upstream (same as 'repo sync')\n"
     message "\tupdate\t\tUpdate acidify to the latest and greatest\n"
     message "\n\n"
     message "Available build types (case sensitive):\n"
