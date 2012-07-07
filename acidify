@@ -386,15 +386,15 @@ function upload()
             AOKP_BUILD=40
             device_build=$DEVICE"_build"
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
             ;;
         CM9)
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
             ;;
         CM7)
             message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $gooUser@upload.goo.im:~/public_html/$goodir/
+            scp -P 2222 out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
             ;;
         *)
             error "Not a valid build type!\n"
