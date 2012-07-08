@@ -18,7 +18,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=2
-RELVERSION=8
+RELVERSION=9
 
 export PATH="~/bin:$PATH"
 
@@ -339,7 +339,6 @@ function release()
 
 function deploy()
 {
-    set -x
     command -v adb >/dev/null 2>&1 || error "ADB is not installed and/or in your PATH, so I cannot deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
     case $buildtype in
@@ -371,14 +370,14 @@ function deploy()
         message "If this operation takes too long try unplugging and plugging your phone back in.\n"
         adb wait-for-device
         message "Removing old build(s)!\n"
-        adb shell rm $rm_zip_path
+        adb shell rm "$rm_zip_path"
         message "Pushing new build!\n"
-        adb push $local_zip_path $remote_zip_path
+        adb push "$local_zip_path" "$remote_zip_path"
         message "Operation completed (hopefully successfully).\n"
         message "Rebooting to recovery...\n"
         adb reboot recovery
     else
-        error "Could not find the output zip file. Make sure you run a build first.\n$local_zip_path"
+        error "Could not find the output zip file. Make sure you run a build first.\n"
     fi
 }
 
@@ -390,24 +389,30 @@ function upload()
         AOKP)
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
-            AOKP_BUILD=40
-            device_build=$DEVICE"_build"
-            message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
+            AOKP_BUILD=6
+            device_build=$DEVICE"_milestone"
+            local_zip_path=out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
+            remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM9)
-            message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
+            local_zip_path=out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM7)
-            message "Uploading to goo.im\n"
-            scp -P 2222 out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip $GOOUSER@upload.goo.im:~/public_html/$goodir/
+            local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         *)
             error "Not a valid build type!\n"
             ;;
     esac
-    message "Uploaded latest build to goo.im\n"
+    if [ -f "$local_zip_path" ]; then
+        message "Uploading to goo.im\n"
+        scp -P 2222 "$local_zip_path" "$remote_zip_path"
+        message "Uploaded latest build to goo.im\n"
+    else
+        error "Could not find the output zip file. Make sure you run a build first.\n"
+    fi
 }
 
 function sync()
