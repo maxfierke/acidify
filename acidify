@@ -53,7 +53,7 @@ function abort()
 function setbuildtype()
 {
     buildtype="${@}"
-    
+
     if [ ! -d $resdir/.acidify ]
     then
         mkdir -p $resdir/.acidify
@@ -339,41 +339,47 @@ function release()
 
 function deploy()
 {
-    command -v adb >/dev/null 2>&1 || error "ADB is not installed/in your PATH, so I cannot deploy!\n"
+    set -x
+    command -v adb >/dev/null 2>&1 || error "ADB is not installed and/or in your PATH, so I cannot deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
-    adb wait-for-device
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=6
-            device_build=$DEVICE"_milestone-"
-            message "Removing old build(s)!\n"
-            adb shell rm /sdcard/aokp_$DEVICE*.zip
-            message "Pushing new build!\n"
-            adb push out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip /sdcard/aokp_$device_build-$AOKP_BUILD.zip
+            device_build=$DEVICE"_milestone"
+            rm_zip_path=/sdcard/aokp_$DEVICE*.zip
+            local_zip_path=out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
+            remote_zip_path=/sdcard/aokp_$device_build-$AOKP_BUILD.zip
             ;;
         CM9)
-            message "Removing old build(s)!\n"
-            adb shell rm /sdcard/cm-9-*.zip
-            message "Pushing new build!\n"
-            adb push out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip /sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            rm_zip_path=/sdcard/cm-9-*.zip
+            local_zip_path=out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=/sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
         CM7)
-            message "Removing old build(s)!\n"
-            adb shell rm /sdcard/cm-7-*.zip
-            message "Pushing new build!\n"
-            adb push out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip /sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            rm_zip_path=/sdcard/cm-7-*.zip
+            local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=/sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
         *)
             error "Not a valid build type!\n"
             ;;
     esac
-    message "Operation completed (hopefully successfully)\n"
-    message "Waiting for Android device...\n"
-    adb wait-for-device
-    message "Rebooting to recovery...\n"
-    adb reboot recovery
+    if [ -f "$local_zip_path" ]; then
+        message "Waiting for your Android device to be detected...\n"
+        message "If this operation takes too long try unplugging and plugging your phone back in.\n"
+        adb wait-for-device
+        message "Removing old build(s)!\n"
+        adb shell rm $rm_zip_path
+        message "Pushing new build!\n"
+        adb push $local_zip_path $remote_zip_path
+        message "Operation completed (hopefully successfully).\n"
+        message "Rebooting to recovery...\n"
+        adb reboot recovery
+    else
+        error "Could not find the output zip file. Make sure you run a build first.\n$local_zip_path"
+    fi
 }
 
 function upload()
