@@ -339,14 +339,15 @@ function release()
 
 function deploy()
 {
-    command -v adb >/dev/null 2>&1 || error "ADB is not installed/in your PATH, so I can not deploy!\n"
+    command -v adb >/dev/null 2>&1 || error "ADB is not installed/in your PATH, so I cannot deploy!\n"
     BUILD_DATE=$(date -u +%Y%m%d)
+    adb wait-for-device
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
             # Someone that builds for AOKP should definitely fix this
-            AOKP_BUILD=40
-            device_build=$DEVICE"_build"
+            AOKP_BUILD=6
+            device_build=$DEVICE"_milestone-"
             message "Removing old build(s)!\n"
             adb shell rm /sdcard/aokp_$DEVICE*.zip
             message "Pushing new build!\n"
