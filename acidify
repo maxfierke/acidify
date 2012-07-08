@@ -212,16 +212,16 @@ function message() {
 function setup()
 {
     mkdir -p ~/bin
-    message "Fetching the latest version of repo\n"
-    curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
-    chmod a+x ~/bin/repo
-
     message "Making Acidify available from any directory\n"
     ln -fs $acidifycmd ~/bin/acidify
 
     message "Installing required packages for building Android\n"
     installreqpackages
     
+    message "Fetching the latest version of repo\n"
+    curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
+    chmod a+x ~/bin/repo
+
     message "Your machine is ready to setup the Android build environment\n"
     message "Please see http://source.android.com/source/initializing.html for\n"
     message "instructions on setting up ADB and the udev rules required.\n"
