@@ -114,12 +114,13 @@ function aptgetreq()
 
 function installreqpackages()
 {
-    [ -e /etc/lsb-release ] && . /etc/lsb-release || DISTRIB_ID="Your system"
+    [[ -f /etc/lsb-release && -r /etc/lsb-release ]] && . /etc/lsb-release
     case $DISTRIB_ID in
         Ubuntu)
             aptgetreq
             ;;
         *)
+			[[ -v DISTRIB_ID ]] || DISTRIB_ID="Your system"
             error "$DISTRIB_ID is unsupported by this script!\n" \
 			"Refer to the building Android guide for $DISTRIB_ID\n" \
             "to determine what packages you need.\n"
