@@ -7,6 +7,7 @@ set -e
 LM_AOKP="http://teamacid.github.com/AOKP/local_manifest.xml"
 LM_CM7="http://teamacid.github.com/CM7/local_manifest.xml"
 LM_CM9="http://teamacid.github.com/CM9/local_manifest.xml"
+LM_GUMMY="http://teamacid.github.com/Gummy/local_manifest.xml"
 # Repo Configuration
 DLJOBS=4                           # number of concurrent downloads
 # Device Configuration
@@ -123,7 +124,7 @@ function installreqpackages()
 			[[ -v DISTRIB_ID ]] || DISTRIB_ID="Your system"
             error "$DISTRIB_ID is unsupported by this script!\n" \
 			"Refer to the building Android guide for $DISTRIB_ID\n" \
-            "to determine what packages you need.\n"
+			"to determine what packages you need.\n"
             ;;
     esac
 }
@@ -278,6 +279,18 @@ function init()
             repo start --all ics
             $resdir/vendor/cm/get-prebuilts
             ;;
+        gummy)
+            setbuildtype "Gummy"
+            cleanenv
+            message "Initializing repository\n"
+	    repo init -u https://github.com/teamgummy/platform_manifest.git -b master
+            if [ x"$LM_GUMMY" != x"" ]; then
+                message "Fetching $buildtype local manifest"
+                curl $LM_GUMMY > $resdir/.repo/local_manifest.xml
+            fi
+            message "Syncing changes with upstream\n"
+            repo sync -j$DLJOBS -f -d
+	    ;;
         *)
             error "That configuration does not exist!\n"
             abort
@@ -298,6 +311,9 @@ function config()
         CM7)
             lunch cyanogen_$DEVICE-eng
             ;;
+        Gummy)
+            lunch Gummy_$DEVICE-userdebug
+            ;;
         *)
             error "Invalid build type!\n"
             ;;
@@ -306,6 +322,7 @@ function config()
 
 function build()
 {
+    build_argument="bacon"
     message "Building $buildtype\n"
     checkenv
     config
@@ -319,7 +336,11 @@ function build()
     if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
         $resdir/kernel/samsung/galaxys4gmtd/build.sh build
     fi
-    mka bacon
+    if [ "$buildtype" = "Gummy" ]; then
+        build_argument="gummy"
+    fi
+
+    mka "$build_argument"
 }
 
 function clean()
@@ -362,6 +383,14 @@ function deploy()
             local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=/sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
+        Gummy)
+	    # TODO: Figure out a better way of getting the ZIP'S date, not the current date
+	    #       since Gummy uses hour and minute along with the build date
+	    gummy_build_date=$(date +%Y-%m-%d-%H_%m)
+            rm_zip_path=/sdcard/Gummy_*.zip
+            local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
+            remote_zip_path=/sdcard/Gummy_$DEVICE-Release-$gummy_build_date.zip
+            ;;
         *)
             error "Not a valid build type!\n"
             ;;
@@ -401,6 +430,13 @@ function upload()
             ;;
         CM7)
             local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
+            ;;
+        Gummy)
+	    # TODO: Figure out a better way of getting the ZIP'S date, not the current date
+	    #       since Gummy uses hour and minute along with the build date
+	    gummy_build_date=$(date +%Y-%m-%d-%H_%m)
+            local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         *)
@@ -468,6 +504,7 @@ function usage()
     message "\tcm7\t\tFor CyanogenMod 7\n"
     message "\tcm9\t\tFor CyanogenMod 9\n"
     message "\taokp\t\tFor Android Open Kang Project\n"
+    message "\tgummy\t\tFor Team Gummy's ICS ROM\n"
     abort
 }
 
