@@ -290,6 +290,8 @@ function init()
             fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
+            cd $resdir/vendor/Gummy
+            ./get-prebuilts
 	    ;;
         *)
             error "That configuration does not exist!\n"
