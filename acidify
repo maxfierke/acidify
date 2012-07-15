@@ -28,13 +28,14 @@ startTime=$(date +%s)
 
 # Command line arguments
 arch=$(uname -m)
-acidifycmd=$(readlink -f $0)
-acidifydir=$(dirname $acidifycmd)
+ACIDIFY_CMD=$(readlink -f $0)
+ACIDIFY_DIR=$(dirname $ACIDIFY_CMD)
+ACIDIFY_LINK=~/bin/acidify
 if [ x"${ANDROID_BUILD_TOP}" = x"" ]
 then
-    resdir=`pwd`
+    RESDIR=`pwd`
 else
-    resdir=${ANDROID_BUILD_TOP}
+    RESDIR=${ANDROID_BUILD_TOP}
 fi
 command="${1}"
 arg="${2}"
@@ -55,12 +56,12 @@ function setbuildtype()
 {
     buildtype="${@}"
 
-    if [ ! -d $resdir/.acidify ]
+    if [ ! -d $RESDIR/.acidify ]
     then
-        mkdir -p $resdir/.acidify
+        mkdir -p $RESDIR/.acidify
     fi
 
-    echo $buildtype > $resdir/.acidify/buildtype || error "Could not write to $resdir/.acidify !\n"
+    echo $buildtype > $RESDIR/.acidify/buildtype || error "Could not write to $RESDIR/.acidify !\n"
 }
 
 function aptgetreq()
@@ -131,8 +132,8 @@ function installreqpackages()
 
 function checkenv()
 {
-    if [ -f $resdir/build/envsetup.sh ]; then
-        command -v brunch >/dev/null 2>&1 || . $resdir/build/envsetup.sh
+    if [ -f $RESDIR/build/envsetup.sh ]; then
+        command -v brunch >/dev/null 2>&1 || . $RESDIR/build/envsetup.sh
     else
         error "Could not run envsetup.sh.\nHave you run " \
         "acidify init yet?"
@@ -141,38 +142,38 @@ function checkenv()
 
 function cleanenv()
 {
-    if [ -f $resdir/build/envsetup.sh ]; then
+    if [ -f $RESDIR/build/envsetup.sh ]; then
         checkenv
         make clobber
     fi
-    if [ -d $resdir/kernel/$MANUFACTURER/$DEVICE ]; then
-        cd $resdir/kernel/$MANUFACTURER/$DEVICE
+    if [ -d $RESDIR/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $RESDIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $resdir
+        cd $RESDIR
     fi
-    if [ -d $resdir/android ]; then
-        message "Removing $resdir/android\n"
-        rm -rf $resdir/android
+    if [ -d $RESDIR/android ]; then
+        message "Removing $RESDIR/android\n"
+        rm -rf $RESDIR/android
     fi
-    if [ -d $resdir/platform_manifest ]; then
-        message "Removing $resdir/platform_manifest\n"
-        rm -rf $resdir/platform_manifest
+    if [ -d $RESDIR/platform_manifest ]; then
+        message "Removing $RESDIR/platform_manifest\n"
+        rm -rf $RESDIR/platform_manifest
     fi
-    if [ -d $resdir/.repo/manifests ]; then
-        message "Removing $resdir/.repo/manifests\n"
-        rm -rf $resdir/.repo/manifests
+    if [ -d $RESDIR/.repo/manifests ]; then
+        message "Removing $RESDIR/.repo/manifests\n"
+        rm -rf $RESDIR/.repo/manifests
     fi
-    if [ -d $resdir/.repo/manifests.git ]; then
-        message "Removing $resdir/.repo/manifests.git\n"
-        rm -rf $resdir/.repo/manifests.git
+    if [ -d $RESDIR/.repo/manifests.git ]; then
+        message "Removing $RESDIR/.repo/manifests.git\n"
+        rm -rf $RESDIR/.repo/manifests.git
     fi
-    if [ -f $resdir/.repo/manifest.xml ]; then
-        message "Removing $resdir/.repo/manifest.xml\n"
-        rm -f $resdir/.repo/manifest.xml
+    if [ -f $RESDIR/.repo/manifest.xml ]; then
+        message "Removing $RESDIR/.repo/manifest.xml\n"
+        rm -f $RESDIR/.repo/manifest.xml
     fi
-    if [ -f $resdir/.repo/local_manifest.xml ]; then
-        message "Removing $resdir/.repo/local_manifest.xml\n"
-        rm -f $resdir/.repo/local_manifest.xml
+    if [ -f $RESDIR/.repo/local_manifest.xml ]; then
+        message "Removing $RESDIR/.repo/local_manifest.xml\n"
+        rm -f $RESDIR/.repo/local_manifest.xml
     fi
 }
 
@@ -215,15 +216,14 @@ function setup()
 {
     mkdir -p ~/bin
     message "Making Acidify available from any directory\n"
-    ln -fs $acidifycmd ~/bin/acidify
-
+    if [ ! -f $ACIDIFY_LINK ]; then
+        ln -s $ACIDIFY_CMD $ACIDIFY_LINK
+    fi
     message "Installing required packages for building Android\n"
     installreqpackages
-    
     message "Fetching the latest version of repo\n"
     curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
     chmod a+x ~/bin/repo
-
     message "Your machine is ready to setup the Android build environment\n"
     message "Please see http://source.android.com/source/initializing.html for\n"
     message "instructions on setting up ADB and the udev rules required.\n"
@@ -242,7 +242,7 @@ function init()
             repo init -u https://github.com/AOKP/platform_manifest.git -b ics
             if [ x"$LM_AOKP" != x"" ]; then
                 message "Fetching $buildtype local manifest"
-                curl $LM_AOKP > $resdir/.repo/local_manifest.xml
+                curl $LM_AOKP > $RESDIR/.repo/local_manifest.xml
             fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
@@ -256,13 +256,13 @@ function init()
             repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
             if [ x"$LM_CM7" != x"" ]; then
                 message "Fetching $buildtype local manifest"
-                curl $LM_CM7 > $resdir/.repo/local_manifest.xml
+                curl $LM_CM7 > $RESDIR/.repo/local_manifest.xml
             fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
             message "Starting all projects on task branch gingerbread"
             repo start --all gingerbread
-            $resdir/vendor/cyanogen/get-rommanager
+            $RESDIR/vendor/cyanogen/get-rommanager
             ;;
         cm9)
             setbuildtype "CM9"
@@ -271,13 +271,13 @@ function init()
             repo init -u https://github.com/CyanogenMod/android.git -b ics
             if [ x"$LM_CM9" != x"" ]; then
                 message "Fetching $buildtype local manifest"
-                curl $LM_CM9 > $resdir/.repo/local_manifest.xml
+                curl $LM_CM9 > $RESDIR/.repo/local_manifest.xml
             fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
             message "Starting all projects on task branch ics"
             repo start --all ics
-            $resdir/vendor/cm/get-prebuilts
+            $RESDIR/vendor/cm/get-prebuilts
             ;;
         gummy)
             setbuildtype "Gummy"
@@ -286,11 +286,11 @@ function init()
             repo init -u https://github.com/teamgummy/platform_manifest.git -b master
             if [ x"$LM_GUMMY" != x"" ]; then
                 message "Fetching $buildtype local manifest"
-                curl $LM_GUMMY > $resdir/.repo/local_manifest.xml
+                curl $LM_GUMMY > $RESDIR/.repo/local_manifest.xml
             fi
             message "Syncing changes with upstream\n"
             repo sync -j$DLJOBS -f -d
-            cd $resdir/vendor/Gummy
+            cd $RESDIR/vendor/Gummy
             ./get-prebuilts
 	    ;;
         *)
@@ -336,7 +336,7 @@ function build()
         out/target/product/galaxys4gmtd/utilities/bml_over_mtd
     fi
     if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
-        $resdir/kernel/samsung/galaxys4gmtd/build.sh build
+        $RESDIR/kernel/samsung/galaxys4gmtd/build.sh build
     fi
     if [ "$buildtype" = "Gummy" ]; then
         build_argument="gummy"
@@ -347,10 +347,10 @@ function build()
 
 function clean()
 {
-    if [ -d $resdir/kernel/$MANUFACTURER/$DEVICE ]; then
-        cd $resdir/kernel/$MANUFACTURER/$DEVICE
+    if [ -d $RESDIR/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $RESDIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $resdir
+        cd $RESDIR
     fi
     make clobber
 }
@@ -480,12 +480,12 @@ function update()
 {
     message "Removing "
     version
-    rm $acidifydir/acidify
+    rm $ACIDIFY_DIR/acidify
     message "Fetching newest version from Github\n"
-    curl https://raw.github.com/teamacid/acidify/master/acidify > $acidifydir/acidify
-    chmod +x $acidifydir/acidify
+    curl https://raw.github.com/teamacid/acidify/master/acidify > $ACIDIFY_DIR/acidify
+    chmod +x $ACIDIFY_DIR/acidify
     message "Updated to "
-    $acidifydir/acidify version
+    $ACIDIFY_DIR/acidify version
 }
 
 function usage()
@@ -521,7 +521,7 @@ function main()
 {
     version
 	
-    mkdir -p $resdir/.acidify
+    mkdir -p $RESDIR/.acidify
 	
     case $command in
         setup)
@@ -569,8 +569,8 @@ fi
 if [ x"${arch}" != x"x86_64" ]; then
     error "Only 64-bit machines are supported!\n"
 fi
-if [ -f $resdir/.acidify/buildtype ]; then
-    buildtype=$(cat $resdir/.acidify/buildtype)
+if [ -f $RESDIR/.acidify/buildtype ]; then
+    buildtype=$(cat $RESDIR/.acidify/buildtype)
 else
     setbuildtype "CM9" # CM9 is what is actively being developed. Let's make it the default.
 fi
