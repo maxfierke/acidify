@@ -19,15 +19,15 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=3
-RELVERSION=2
+RELVERSION=3
 
 export PATH="~/bin:$PATH"
 
 # Start the timer
-startTime=$(date +%s)
+START_TIME=$(date +%s)
 
 # Command line arguments
-arch=$(uname -m)
+ARCH=$(uname -m)
 ACIDIFY_CMD=$(readlink -f $0)
 ACIDIFY_DIR=$(dirname $ACIDIFY_CMD)
 ACIDIFY_LINK=~/bin/acidify
@@ -463,9 +463,8 @@ function sync()
 
 function timer()
 {
-    START=$startTime
-    END=$(date +%s)
-    ELAPSED=$((END - START))
+    END_TIME=$(date +%s)
+    ELAPSED=$((END_TIME - START_TIME))
     E_HR=$((ELAPSED / 60 / 60))
     E_MIN=$(((ELAPSED / 60) % 60))
     E_SEC=$((ELAPSED % 60))
@@ -566,7 +565,7 @@ if [ x"${command}" = x"" ]; then
     error "You must supply a command!\n"
     usage
 fi
-if [ x"${arch}" != x"x86_64" ]; then
+if [ x"${ARCH}" != x"x86_64" ]; then
     error "Only 64-bit machines are supported!\n"
 fi
 if [ -f $RESDIR/.acidify/buildtype ]; then
