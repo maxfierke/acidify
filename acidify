@@ -19,7 +19,7 @@ GOOUSER=TeamAcid
 
 MAJVERSION=0
 MINVERSION=3
-RELVERSION=3
+RELVERSION=4
 
 export PATH="~/bin:$PATH"
 
@@ -487,6 +487,19 @@ function update()
     $ACIDIFY_DIR/acidify version
 }
 
+function flash()
+{
+    message "This will flash the latest boot image via heimdall\n"
+    message "Make sure you're in download mode!\n"
+    command -v heimdall >/dev/null 2>&1 || error "heimdall-cli is not installed, so flashing cannot continue.\n"
+    if [ ! -f "$RESDIR/out/target/product/$DEVICE/boot.img" ]; then
+        message "Flashing boot image\n"
+        sudo heimdall flash --kernel "$RESDIR/out/target/product/$DEVICE/boot.img"
+    else
+        error "boot.img does not exist! You probably forgot to build it."
+    fi
+}
+
 function usage()
 {
     message "Usage: acidify [command] (build type)\n"
@@ -502,6 +515,7 @@ function usage()
     message "\tupload\t\tUploads the latest build to goo.im\n"
     message "\tsync\t\tSyncs the latest changes from upstream (same as 'repo sync')\n"
     message "\tupdate\t\tUpdate acidify to the latest and greatest\n"
+    message "\tflash\t\tFlash the latest boot image via heimdall\n"
     message "\n\n"
     message "Available build types (case sensitive):\n"
     message "\tcm7\t\tFor CyanogenMod 7\n"
@@ -543,6 +557,9 @@ function main()
             ;;
         deploy)
             deploy
+            ;;
+        flash)
+            flash
             ;;
         upload)
             upload
