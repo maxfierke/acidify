@@ -492,7 +492,7 @@ function flash()
     message "This will flash the latest boot image via heimdall\n"
     message "Make sure you're in download mode!\n"
     command -v heimdall >/dev/null 2>&1 || error "heimdall-cli is not installed, so flashing cannot continue.\n"
-    if [ ! -f "$RESDIR/out/target/product/$DEVICE/boot.img" ]; then
+    if [ -f "$RESDIR/out/target/product/$DEVICE/boot.img" ]; then
         message "Flashing boot image\n"
         sudo heimdall flash --kernel "$RESDIR/out/target/product/$DEVICE/boot.img"
     else
