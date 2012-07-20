@@ -64,6 +64,33 @@ function setbuildtype()
     echo $buildtype > $RESDIR/.acidify/buildtype || error "Could not write to $RESDIR/.acidify !\n"
 }
 
+function getlocalmanifest()
+{
+    lm_url=""
+    case $buildtype in
+        AOKP)
+            lm_url="$LM_AOKP"
+            ;;
+        CM9)
+            lm_url="$LM_CM9"
+            ;;
+        CM7)
+            lm_url="$LM_CM7"
+            ;;
+        Gummy)
+            lm_url="$LM_GUMMY"
+            ;;
+        *)
+            error "Invalid build type!\n"
+            ;;
+    esac
+
+    if [ x"$lm_url" != x"" ]; then
+        message "Fetching $buildtype local manifest\n"
+        curl $lm_url > $RESDIR/.repo/local_manifest.xml
+    fi
+}
+
 function aptgetreq()
 {
     . /etc/lsb-release
@@ -229,6 +256,24 @@ function setup()
     message "instructions on setting up ADB and the udev rules required.\n"
 }
 
+function initrepo(){
+    if [ x"$1" != x"" -a x"$2" != x"" -a x"$3" != x"" ]; then
+        init_buildtype=$1
+        init_repo_url=$2
+        init_repo_branch=$3
+        setbuildtype "$init_buildtype"
+        cleanenv
+        message "Initializing repository\n"
+        repo init -u $init_repo_url -b $init_repo_branch
+        sync
+        message "Starting all projects on task branch $init_repo_branch"
+        repo start --all $init_repo_branch
+    else
+        error "You must supply all arguments to initrepo()\nPlease edit" \
+              "the script and try again.\n"
+    fi
+}
+
 function init()
 {
     command -v repo >/dev/null 2>&1 || error "You don't have the repo utility!\nRun 'acidify setup' to correct this.\n"
@@ -236,60 +281,30 @@ function init()
     message "This WILL REMOVE ALL LOCAL CHANGES\n"
     case $arg in
         aokp)
-            setbuildtype "AOKP"
-            cleanenv
-            message "Initializing repository\n"
-            repo init -u https://github.com/AOKP/platform_manifest.git -b ics
-            if [ x"$LM_AOKP" != x"" ]; then
-                message "Fetching $buildtype local manifest"
-                curl $LM_AOKP > $RESDIR/.repo/local_manifest.xml
-            fi
-            message "Syncing changes with upstream\n"
-            repo sync -j$DLJOBS -f -d
-            message "Starting all projects on task branch ics"
-            repo start --all ics
+            init_buildtype="AOKP"
+            init_repo_url="https://github.com/AOKP/platform_manifest.git"
+            init_repo_branch="ics"
+            initrepo $init_buildtype $init_repo_url $init_repo_branch
             ;;
         cm7)
-            setbuildtype "CM7"
-            cleanenv
-            message "Initializing repository\n"
-            repo init -u https://github.com/CyanogenMod/android.git -b gingerbread
-            if [ x"$LM_CM7" != x"" ]; then
-                message "Fetching $buildtype local manifest"
-                curl $LM_CM7 > $RESDIR/.repo/local_manifest.xml
-            fi
-            message "Syncing changes with upstream\n"
-            repo sync -j$DLJOBS -f -d
-            message "Starting all projects on task branch gingerbread"
-            repo start --all gingerbread
+            init_buildtype="CM7"
+            init_repo_url="https://github.com/CyanogenMod/android.git"
+            init_repo_branch="gingerbread"
+            initrepo $init_buildtype $init_repo_url $init_repo_branch
             $RESDIR/vendor/cyanogen/get-rommanager
             ;;
         cm9)
-            setbuildtype "CM9"
-            cleanenv
-            message "Initializing repository\n"
-            repo init -u https://github.com/CyanogenMod/android.git -b ics
-            if [ x"$LM_CM9" != x"" ]; then
-                message "Fetching $buildtype local manifest"
-                curl $LM_CM9 > $RESDIR/.repo/local_manifest.xml
-            fi
-            message "Syncing changes with upstream\n"
-            repo sync -j$DLJOBS -f -d
-            message "Starting all projects on task branch ics"
-            repo start --all ics
+            init_buildtype="CM9"
+            init_repo_url="https://github.com/CyanogenMod/android.git"
+            init_repo_branch="ics"
+            initrepo $init_buildtype $init_repo_url $init_repo_branch
             $RESDIR/vendor/cm/get-prebuilts
             ;;
         gummy)
-            setbuildtype "Gummy"
-            cleanenv
-            message "Initializing repository\n"
-            repo init -u https://github.com/teamgummy/platform_manifest.git -b master
-            if [ x"$LM_GUMMY" != x"" ]; then
-                message "Fetching $buildtype local manifest"
-                curl $LM_GUMMY > $RESDIR/.repo/local_manifest.xml
-            fi
-            message "Syncing changes with upstream\n"
-            repo sync -j$DLJOBS -f -d
+            init_buildtype="Gummy"
+            init_repo_url="https://github.com/teamgummy/platform_manifest.git"
+            init_repo_branch="master"
+            initrepo $init_buildtype $init_repo_url $init_repo_branch
             cd $RESDIR/vendor/Gummy
             ./get-prebuilts
             ;;
@@ -458,7 +473,9 @@ function upload()
 
 function sync()
 {
-    repo sync -j$DLJOBS
+    getlocalmanifest
+    message "Syncing $buildtype changes with upstream\n"
+    repo sync -j$DLJOBS -f -d
 }
 
 function timer()
@@ -579,7 +596,6 @@ function main()
 }
 
 if [ x"${command}" = x"" ]; then
-    error "You must supply a command!\n"
     usage
 fi
 if [ x"${ARCH}" != x"x86_64" ]; then
