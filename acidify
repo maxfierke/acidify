@@ -101,7 +101,7 @@ function aptgetreq()
                 libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \
                 libgl1-mesa-dev g++-multilib mingw32 openjdk-6-jdk tofrodos \
                 python-markdown libxml2-utils xsltproc zlib1g-dev:i386 schedtool \
-                pngcrush rsync lib32ncurses5-dev
+                pngcrush rsync
             sudo ln -fs /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
             ;;
         oneiric|lisa)
@@ -611,4 +611,4 @@ if [ ! x"${command}" = x"version" -o x"${command}" = x"" ]; then
     timer
 fi
 
-# vim :set ts=4 sw=4 sts=4 et :
+# vim: set ts=4 sw=4 sts=4 et :
