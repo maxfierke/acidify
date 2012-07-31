@@ -68,21 +68,11 @@ function getlocalmanifest()
 {
     lm_url=""
     case $buildtype in
-        AOKP)
-            lm_url="$LM_AOKP"
-            ;;
-        CM9)
-            lm_url="$LM_CM9"
-            ;;
-        CM7)
-            lm_url="$LM_CM7"
-            ;;
-        Gummy)
-            lm_url="$LM_GUMMY"
-            ;;
-        *)
-            error "Invalid build type!\n"
-            ;;
+        AOKP) lm_url="$LM_AOKP";;
+        CM9) lm_url="$LM_CM9";;
+        CM7) lm_url="$LM_CM7";;
+        Gummy) lm_url="$LM_GUMMY";;
+        *) error "Invalid build type!\n";;
     esac
 
     if [ x"$lm_url" != x"" ]; then
@@ -145,9 +135,7 @@ function installreqpackages()
 {
     [[ -f /etc/lsb-release && -r /etc/lsb-release ]] && . /etc/lsb-release
     case $DISTRIB_ID in
-        Ubuntu|LinuxMint)
-            aptgetreq
-            ;;
+        Ubuntu|LinuxMint) aptgetreq;;
         *)
             [[ -v DISTRIB_ID ]] || DISTRIB_ID="Your system"
             error "$DISTRIB_ID is unsupported by this script!\n" \
@@ -163,7 +151,7 @@ function checkenv()
         command -v brunch >/dev/null 2>&1 || . $RESDIR/build/envsetup.sh
     else
         error "Could not run envsetup.sh.\nHave you run " \
-            "acidify init yet?"
+              "acidify init yet?"
     fi
 }
 
@@ -319,21 +307,11 @@ function config()
 {
     checkenv
     case $buildtype in
-        AOKP)
-            lunch aokp_$DEVICE-userdebug
-            ;;
-        CM9)
-            lunch cm_$DEVICE-userdebug
-            ;;
-        CM7)
-            lunch cyanogen_$DEVICE-eng
-            ;;
-        Gummy)
-            lunch Gummy_$DEVICE-userdebug
-            ;;
-        *)
-            error "Invalid build type!\n"
-            ;;
+        AOKP) lunch aokp_$DEVICE-userdebug;;
+        CM9) lunch cm_$DEVICE-userdebug;;
+        CM7) lunch cyanogen_$DEVICE-eng;;
+        Gummy) lunch Gummy_$DEVICE-userdebug;;
+        *) error "Invalid build type!\n";;
     esac
 }
 
@@ -408,9 +386,7 @@ function deploy()
             local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
             remote_zip_path=/sdcard/Gummy_$DEVICE-Release-$gummy_build_date.zip
             ;;
-        *)
-            error "Not a valid build type!\n"
-            ;;
+        *) error "Not a valid build type!\n";;
     esac
     if [ -f "$local_zip_path" ]; then
         message "Waiting for your Android device to be detected...\n"
@@ -456,9 +432,7 @@ function upload()
             local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
-        *)
-            error "Not a valid build type!\n"
-            ;;
+        *) error "Not a valid build type!\n";;
     esac
     if [ -f "$local_zip_path" ]; then
         message "Uploading to goo.im\n"
@@ -554,44 +528,19 @@ function main()
     mkdir -p $RESDIR/.acidify
 
     case $command in
-        setup)
-            setup
-            ;;
-        init)
-            init
-            ;;
-        config)
-            config
-            ;;
-        build)
-            build
-            ;;
-        release)
-            release
-            ;;
-        clean)
-            clean
-            ;;
-        deploy)
-            deploy
-            ;;
-        flash)
-            flash
-            ;;
-        upload)
-            upload
-            ;;
-        sync)
-            sync
-            ;;
-        update)
-            update
-            ;;
-        version)
-            ;;
-        *)
-            usage
-            ;;
+        setup) setup;;
+        init) init;;
+        config) config;;
+        build) build;;
+        release) release;;
+        clean) clean;;
+        deploy) deploy;;
+        flash) flash;;
+        upload) upload;;
+        sync) sync;;
+        update) update;;
+        version) ;; # Leave this blank. Acidify prints its version on every run.
+        *) usage;;
     esac
 }
 
