@@ -7,7 +7,6 @@ set -e
 LM_AOKP="http://teamacid.github.com/AOKP/local_manifest.xml"
 LM_CM7="http://teamacid.github.com/CM7/local_manifest.xml"
 LM_CM9="http://teamacid.github.com/CM9/local_manifest.xml"
-LM_GUMMY="http://teamacid.github.com/Gummy/local_manifest.xml"
 # Repo Configuration
 DLJOBS=4                           # number of concurrent downloads
 # Device Configuration
@@ -71,7 +70,6 @@ function getlocalmanifest()
         AOKP) lm_url="$LM_AOKP";;
         CM9) lm_url="$LM_CM9";;
         CM7) lm_url="$LM_CM7";;
-        Gummy) lm_url="$LM_GUMMY";;
         *) error "Invalid build type!\n";;
     esac
 
@@ -288,14 +286,6 @@ function init()
             initrepo $init_buildtype $init_repo_url $init_repo_branch
             $RESDIR/vendor/cm/get-prebuilts
             ;;
-        gummy)
-            init_buildtype="Gummy"
-            init_repo_url="https://github.com/teamgummy/platform_manifest.git"
-            init_repo_branch="master"
-            initrepo $init_buildtype $init_repo_url $init_repo_branch
-            cd $RESDIR/vendor/Gummy
-            ./get-prebuilts
-            ;;
         *)
             error "That configuration does not exist!\n"
             abort
@@ -310,7 +300,6 @@ function config()
         AOKP) lunch aokp_$DEVICE-userdebug;;
         CM9) lunch cm_$DEVICE-userdebug;;
         CM7) lunch cyanogen_$DEVICE-eng;;
-        Gummy) lunch Gummy_$DEVICE-userdebug;;
         *) error "Invalid build type!\n";;
     esac
 }
@@ -330,9 +319,6 @@ function build()
     fi
     if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
         $RESDIR/kernel/samsung/galaxys4gmtd/build.sh build
-    fi
-    if [ "$buildtype" = "Gummy" ]; then
-        build_argument="gummy"
     fi
 
     mka "$build_argument"
@@ -378,14 +364,6 @@ function deploy()
             local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=/sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
             ;;
-        Gummy)
-            # TODO: Figure out a better way of getting the ZIP'S date, not the current date
-            #       since Gummy uses hour and minute along with the build date
-            gummy_build_date=$(date +%Y-%m-%d-%H_%m)
-            rm_zip_path=/sdcard/Gummy_*.zip
-            local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
-            remote_zip_path=/sdcard/Gummy_$DEVICE-Release-$gummy_build_date.zip
-            ;;
         *) error "Not a valid build type!\n";;
     esac
     if [ -f "$local_zip_path" ]; then
@@ -423,13 +401,6 @@ function upload()
             ;;
         CM7)
             local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
-            remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
-            ;;
-        Gummy)
-            # TODO: Figure out a better way of getting the ZIP'S date, not the current date
-            #       since Gummy uses hour and minute along with the build date
-            gummy_build_date=$(date +%Y-%m-%d-%H_%m)
-            local_zip_path=out/target/product/$DEVICE/Gummy_$DEVICE-Release-$gummy_build_date.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         *) error "Not a valid build type!\n";;
@@ -512,7 +483,6 @@ function usage()
     message "\tcm7\t\tFor CyanogenMod 7\n"
     message "\tcm9\t\tFor CyanogenMod 9\n"
     message "\taokp\t\tFor Android Open Kang Project\n"
-    message "\tgummy\t\tFor Team Gummy's ICS ROM\n"
     abort
 }
 
