@@ -3,22 +3,22 @@
 set -e
 
 ## CONFIGURATION
-# Local Manifest Configuration (these can be blank if you're not using local manifests)
-LM_AOKP="http://teamacid.github.com/AOKP/local_manifest.xml"
-LM_CM7="http://teamacid.github.com/CM7/local_manifest.xml"
-LM_CM9="http://teamacid.github.com/CM9/local_manifest.xml"
 # Repo Configuration
 DLJOBS=4                           # number of concurrent downloads
 # Device Configuration
 MANUFACTURER=samsung
 DEVICE=galaxys4gmtd
+# Local Manifest Configuration (these can be blank if you're not using local manifests)
+LM_AOKP="http://teamacid.github.com/manifests/$DEVICE/AOKP/local_manifest.xml"
+LM_CM7="http://teamacid.github.com/manifests/$DEVICE/CM7/local_manifest.xml"
+LM_CM9="http://teamacid.github.com/manifests/$DEVICE/CM9/local_manifest.xml"
 # User Configuration
 GOOUSER=TeamAcid
 ## END CONFIGURATION
 
 MAJVERSION=0
 MINVERSION=3
-RELVERSION=4
+RELVERSION=5
 
 export PATH="~/bin:$PATH"
 
