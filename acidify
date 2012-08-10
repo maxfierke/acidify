@@ -43,15 +43,15 @@ command="${1}"
 arg="${2}"
 
 # Utility Functions
+function abort()
+{
+    exit 1
+}
+
 function error()
 {
     echo -en "Error: ${*}" | color red
     abort
-}
-
-function abort()
-{
-    exit 1
 }
 
 function setbuildtype()
