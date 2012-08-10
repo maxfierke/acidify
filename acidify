@@ -3,18 +3,20 @@
 set -e
 
 ## CONFIGURATION
+## Each of the following can be overriden in the environment.
+## For example. Override the DLJOBS with: DLJOBS=8 ./acidify
 # Repo Configuration
-DLJOBS=4                           # number of concurrent downloads
+${DLJOBS:-4}                           # number of concurrent downloads
 # Device Configuration
-MANUFACTURER=samsung
-DEVICE=galaxys4gmtd
-MODEL=sgh-t959v
+${MANUFACTURER:-samsung}
+${DEVICE:-galaxys4gmtd}
+${MODEL:-sgh-t959v}
 # Local Manifest Configuration (these can be blank if you're not using local manifests)
-LM_AOKP="http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"
-LM_CM7="http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"
-LM_CM9="http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"
+${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
+${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
+${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
 # User Configuration
-GOOUSER=TeamAcid
+${GOOUSER:-TeamAcid}
 ## END CONFIGURATION
 
 MAJVERSION=0
