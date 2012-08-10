@@ -318,6 +318,9 @@ function build()
     fi
 
     mka "$build_argument"
+    if [ ! $? -eq 0 ]; then
+        error "mka ${build_argument} failed!\n"
+    fi
 }
 
 function clean()
