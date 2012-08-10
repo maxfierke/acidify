@@ -406,11 +406,11 @@ function upload()
         message "If you upload fails, just run acidify upload again.\n"
         message "The upload will continue from where it left off.\n"
         rsync --partial --progress -e "ssh -p 2222" "$local_zip_path" "$remote_zip_path"
-	if [ $? -eq 0 ]; then
-		message "Uploaded latest build to goo.im\n"
-	else
-		error "The latest build failed to upload to goo.im !\n"
-	fi
+        if [ $? -eq 0 ]; then
+            message "Uploaded latest build to goo.im\n"
+        else
+            error "The latest build failed to upload to goo.im !\n"
+        fi
     else
         error "Could not find the output zip file. Make sure you run a build first.\n"
     fi
