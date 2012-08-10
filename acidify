@@ -6,17 +6,17 @@ set -e
 ## Each of the following can be overridden in the environment.
 ## For example. Override the DLJOBS with: DLJOBS=8 ./acidify
 # Repo Configuration
-${DLJOBS:-4}                           # number of concurrent downloads
+DLJOBS=${DLJOBS:-4}             # number of concurrent downloads
 # Device Configuration
-${MANUFACTURER:-samsung}
-${DEVICE:-galaxys4gmtd}
-${MODEL:-sgh-t959v}
+MANUFACTURER=${MANUFACTURER:-samsung}
+DEVICE=${DEVICE:-galaxys4gmtd}
+MODEL=${MODEL:-sgh-t959v}
 # Local Manifest Configuration (these can be blank if you're not using local manifests)
-${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
-${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
-${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
+LM_AOKP=${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
+LM_CM7=${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
+LM_CM9=${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
 # User Configuration
-${GOOUSER:-TeamAcid}
+GOOUSER=${GOOUSER:-TeamAcid}
 ## END CONFIGURATION
 
 MAJVERSION=0
