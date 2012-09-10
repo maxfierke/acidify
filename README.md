@@ -4,7 +4,8 @@ Acidify is a tool for building Android builds. It allows easy switching between 
 
 That said, it is a tool designed for people that are already building Android but want to be able to switch between CM7, CM9, and AOKP easily. It's primarily a convenience tool for TeamAcid developers.
 ## Can I use Acidify?
-Of course you can use Acidify! Be aware that it grabs manifests from us (TeamAcid) so in its unmodified state you'll only be able to build Android the way we build Android. As of 0.2.4, however, there are configurable options that allow building for any device. Simply specify any local manifest URLs and the device name in the script.
+Of course you can use Acidify! Be aware that it grabs manifests from us (TeamAcid) so in its unconfigurd state you'll only be able to build Android the way we build Android. 
+As of 0.4.0, you may modify config.sample and place it at ~/.acidify/config in order to override the script's default configuration. In addition, you can specify the same configuration options in the environment by setting them before invoking the script.
 ## What do I need to use Acidify?
 **Short Answer:** A POSIX-compliant machine with bash which is capable of compiling Android.
 
