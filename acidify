@@ -2,9 +2,16 @@
 
 set -e
 
-## CONFIGURATION
+if [ -f ~/.acidify/config ]; then
+    source ~/.acidify/config
+else
+    echo -en "Warning: Could not load configuration file. Using environmental or program defaults.\n" | color yellow
+fi
+
+## DEFAULT CONFIGURATION - DO NOT MODIFY
 ## Each of the following can be overridden in the environment.
-## For example. Override the DLJOBS with: DLJOBS=8 ./acidify
+## They will also be overriden by the config file in ~/.acidify
+## For example. Override the DLJOBS with: DLJOBS=8 acidify
 # Repo Configuration
 DLJOBS=${DLJOBS:-4}             # number of concurrent downloads
 # Device Configuration
@@ -17,14 +24,21 @@ LM_CM7=${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest
 LM_CM9=${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
 # User Configuration
 GOOUSER=${GOOUSER:-TeamAcid}
+# Build System Configuration
+ANDROID_ENV_DIR=${ANDROID_ENV_DIR:-${ANDROID_BUILD_TOP}}
 ## END CONFIGURATION
 
 MAJVERSION=0
-MINVERSION=3
-RELVERSION=5
+MINVERSION=4
+RELVERSION=0
 
 export PATH="~/bin:$PATH"
 
+
+# If ANDROID_ENV_DIR is defined, cd to it. It makes the script completely runnable from anywhere.
+if [ -z "$ANDROID_ENV_DIR" ]; then
+    cd $ANDROID_ENV_DIR
+fi
 # Start the timer
 START_TIME=$(date +%s)
 
@@ -33,12 +47,6 @@ ARCH=$(uname -m)
 ACIDIFY_CMD=$(readlink -f $0)
 ACIDIFY_DIR=$(dirname $ACIDIFY_CMD)
 ACIDIFY_LINK=~/bin/acidify
-if [ x"${ANDROID_BUILD_TOP}" = x"" ]
-then
-    RESDIR=`pwd`
-else
-    RESDIR=${ANDROID_BUILD_TOP}
-fi
 command="${1}"
 arg="${2}"
 
@@ -56,19 +64,12 @@ function error()
 
 function setbuildtype()
 {
-    buildtype="${@}"
-
-    if [ ! -d $RESDIR/.acidify ]
-    then
-        mkdir -p $RESDIR/.acidify
-    fi
-
-    echo $buildtype > $RESDIR/.acidify/buildtype || error "Could not write to $RESDIR/.acidify !\n"
+    echo ${@} > $ANDROID_ENV_DIR/.acidify/buildtype || error "Could not write to $ANDROID_ENV_DIR/.acidify/buildtype !\n"
 }
 
 function getlocalmanifest()
 {
-    lm_url=""
+    local lm_url=""
     case $buildtype in
         AOKP) lm_url="$LM_AOKP";;
         CM9) lm_url="$LM_CM9";;
@@ -78,7 +79,7 @@ function getlocalmanifest()
 
     if [ x"$lm_url" != x"" ]; then
         message "Fetching $buildtype local manifest\n"
-        curl $lm_url > $RESDIR/.repo/local_manifest.xml
+        curl $lm_url > $ANDROID_ENV_DIR/.repo/local_manifest.xml
     fi
 }
 
@@ -140,63 +141,62 @@ function installreqpackages()
         *)
             [[ -v DISTRIB_ID ]] || DISTRIB_ID="Your system"
             error "$DISTRIB_ID is unsupported by this script!\n" \
-                "Refer to the building Android guide for $DISTRIB_ID\n" \
-                "to determine what packages you need.\n"
+                  "Refer to the building Android guide for $DISTRIB_ID\n" \
+                  "to determine what packages you need.\n"
             ;;
     esac
 }
 
 function checkenv()
 {
-    if [ -f $RESDIR/build/envsetup.sh ]; then
-        command -v brunch >/dev/null 2>&1 || . $RESDIR/build/envsetup.sh
+    if [ -f $ANDROID_ENV_DIR/build/envsetup.sh ]; then
+        command -v brunch >/dev/null 2>&1 || . $ANDROID_ENV_DIR/build/envsetup.sh
     else
-        error "Could not run envsetup.sh.\nHave you run " \
-              "acidify init yet?"
+        error "Could not run envsetup.sh.\nHave you run acidify init yet?"
     fi
 }
 
 function cleanenv()
 {
-    if [ -f $RESDIR/build/envsetup.sh ]; then
+    if [ -f $ANDROID_ENV_DIR/build/envsetup.sh ]; then
         checkenv
         make clobber
     fi
-    if [ -d $RESDIR/kernel/$MANUFACTURER/$DEVICE ]; then
-        cd $RESDIR/kernel/$MANUFACTURER/$DEVICE
+    if [ -d $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $RESDIR
+        cd $ANDROID_ENV_DIR
     fi
-    if [ -d $RESDIR/android ]; then
-        message "Removing $RESDIR/android\n"
-        rm -rf $RESDIR/android
+    if [ -d $ANDROID_ENV_DIR/android ]; then
+        message "Removing $ANDROID_ENV_DIR/android\n"
+        rm -rf $ANDROID_ENV_DIR/android
     fi
-    if [ -d $RESDIR/platform_manifest ]; then
-        message "Removing $RESDIR/platform_manifest\n"
-        rm -rf $RESDIR/platform_manifest
+    if [ -d $ANDROID_ENV_DIR/platform_manifest ]; then
+        message "Removing $ANDROID_ENV_DIR/platform_manifest\n"
+        rm -rf $ANDROID_ENV_DIR/platform_manifest
     fi
-    if [ -d $RESDIR/.repo/manifests ]; then
-        message "Removing $RESDIR/.repo/manifests\n"
-        rm -rf $RESDIR/.repo/manifests
+    if [ -d $ANDROID_ENV_DIR/.repo/manifests ]; then
+        message "Removing $ANDROID_ENV_DIR/.repo/manifests\n"
+        rm -rf $ANDROID_ENV_DIR/.repo/manifests
     fi
-    if [ -d $RESDIR/.repo/manifests.git ]; then
-        message "Removing $RESDIR/.repo/manifests.git\n"
-        rm -rf $RESDIR/.repo/manifests.git
+    if [ -d $ANDROID_ENV_DIR/.repo/manifests.git ]; then
+        message "Removing $ANDROID_ENV_DIR/.repo/manifests.git\n"
+        rm -rf $ANDROID_ENV_DIR/.repo/manifests.git
     fi
-    if [ -f $RESDIR/.repo/manifest.xml ]; then
-        message "Removing $RESDIR/.repo/manifest.xml\n"
-        rm -f $RESDIR/.repo/manifest.xml
+    if [ -f $ANDROID_ENV_DIR/.repo/manifest.xml ]; then
+        message "Removing $ANDROID_ENV_DIR/.repo/manifest.xml\n"
+        rm -f $ANDROID_ENV_DIR/.repo/manifest.xml
     fi
-    if [ -f $RESDIR/.repo/local_manifest.xml ]; then
-        message "Removing $RESDIR/.repo/local_manifest.xml\n"
-        rm -f $RESDIR/.repo/local_manifest.xml
+    if [ -f $ANDROID_ENV_DIR/.repo/local_manifest.xml ]; then
+        message "Removing $ANDROID_ENV_DIR/.repo/local_manifest.xml\n"
+        rm -f $ANDROID_ENV_DIR/.repo/local_manifest.xml
     fi
 }
 
 function color()
 {
     # make the color bold
-    BOLD=1\;
+    local BOLD=1\;
 
     function red {
         COLOR=31
@@ -226,6 +226,45 @@ function message() {
     echo -en ${*} | color green
 }
 
+function initrepo(){
+    if [ x"$1" != x"" -a x"$2" != x"" -a x"$3" != x"" ]; then
+        local init_buildtype=$1
+        local init_repo_url=$2
+        local init_repo_branch=$3
+        setbuildtype "$init_buildtype"
+        cleanenv
+        message "Initializing repository\n"
+        repo init -u $init_repo_url -b $init_repo_branch
+        sync
+        message "Starting all projects on task branch $init_repo_branch"
+        repo start --all $init_repo_branch
+    else
+        error "You must supply all arguments to initrepo()\nPlease edit" \
+              "the script and try again.\n"
+    fi
+}
+
+function setbuildpath()
+{
+    local wd=`pwd`
+    wd=${wd}
+    sed -i "s%\(ANDROID_ENV_DIR *= *\$\x7BANDROID_ENV_DIR:-\).*%\1`pwd`\x7D%" ~/.acidify/config
+}
+
+function timer()
+{
+    local end_time=$(date +%s)
+    local elapsed=$((end_time - START_TIME))
+    local e_hr=$((elapsed / 60 / 60))
+    local e_min=$(((elapsed / 60) % 60))
+    local e_sec=$((elapsed % 60))
+
+    printf "Elapsed Time: " | color yellow
+    [ $e_hr != 0 ]  && printf "%d hr(s) "  $e_hr  | color yellow
+    [ $e_min != 0 ] && printf "%d min(s) " $e_min | color yellow
+    printf "%d sec(s)\n" $e_sec | color yellow
+}
+
 # Usable Functions
 
 function setup()
@@ -245,24 +284,6 @@ function setup()
     message "instructions on setting up ADB and the udev rules required.\n"
 }
 
-function initrepo(){
-    if [ x"$1" != x"" -a x"$2" != x"" -a x"$3" != x"" ]; then
-        init_buildtype=$1
-        init_repo_url=$2
-        init_repo_branch=$3
-        setbuildtype "$init_buildtype"
-        cleanenv
-        message "Initializing repository\n"
-        repo init -u $init_repo_url -b $init_repo_branch
-        sync
-        message "Starting all projects on task branch $init_repo_branch"
-        repo start --all $init_repo_branch
-    else
-        error "You must supply all arguments to initrepo()\nPlease edit" \
-              "the script and try again.\n"
-    fi
-}
-
 function init()
 {
     command -v repo >/dev/null 2>&1 || error "You don't have the repo utility!\nRun 'acidify setup' to correct this.\n"
@@ -274,20 +295,23 @@ function init()
             init_repo_url="https://github.com/AOKP/platform_manifest.git"
             init_repo_branch="ics"
             initrepo $init_buildtype $init_repo_url $init_repo_branch
+            setbuildpath
             ;;
         cm7)
             init_buildtype="CM7"
             init_repo_url="https://github.com/CyanogenMod/android.git"
             init_repo_branch="gingerbread"
             initrepo $init_buildtype $init_repo_url $init_repo_branch
-            $RESDIR/vendor/cyanogen/get-rommanager
+            setbuildpath
+            $ANDROID_ENV_DIR/vendor/cyanogen/get-rommanager
             ;;
         cm9)
             init_buildtype="CM9"
             init_repo_url="https://github.com/CyanogenMod/android.git"
             init_repo_branch="ics"
             initrepo $init_buildtype $init_repo_url $init_repo_branch
-            $RESDIR/vendor/cm/get-prebuilts
+            setbuildpath
+            $ANDROID_ENV_DIR/vendor/cm/get-prebuilts
             ;;
         *)
             error "That configuration does not exist!\n"
@@ -309,15 +333,13 @@ function config()
 
 function build()
 {
-    build_argument="bacon"
     message "Building $buildtype\n"
     checkenv
     config
     if [ "$buildtype" = "CM7" -a "$DEVICE" = "galaxys4gmtd" ]; then
-        $RESDIR/kernel/samsung/galaxys4gmtd/build.sh build
+        $ANDROID_ENV_DIR/kernel/samsung/galaxys4gmtd/build.sh build
     fi
-
-    mka "$build_argument"
+    mka bacon
     if [ ! $? -eq 0 ]; then
         error "mka ${build_argument} failed!\n"
     fi
@@ -325,10 +347,10 @@ function build()
 
 function clean()
 {
-    if [ -d $RESDIR/kernel/$MANUFACTURER/$DEVICE ]; then
-        cd $RESDIR/kernel/$MANUFACTURER/$DEVICE
+    if [ -d $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE ]; then
+        cd $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $RESDIR
+        cd $ANDROID_ENV_DIR
     fi
     make clobber
 }
@@ -342,7 +364,10 @@ function release()
 function deploy()
 {
     command -v adb >/dev/null 2>&1 || error "ADB is not installed and/or in your PATH, so I cannot deploy!\n"
-    BUILD_DATE=$(date -u +%Y%m%d)
+    local build_date=$(date -u +%Y%m%d)
+    local rm_zip_path
+    local local_zip_path
+    local remote_zip_path
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
@@ -355,13 +380,13 @@ function deploy()
             ;;
         CM9)
             rm_zip_path=/sdcard/cm-9-*.zip
-            local_zip_path=out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
-            remote_zip_path=/sdcard/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=/sdcard/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
             ;;
         CM7)
             rm_zip_path=/sdcard/cm-7-*.zip
-            local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
-            remote_zip_path=/sdcard/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
+            remote_zip_path=/sdcard/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
             ;;
         *) error "Not a valid build type!\n";;
     esac
@@ -383,8 +408,10 @@ function deploy()
 
 function upload()
 {
-    goodir=$(echo $buildtype | tr '[:upper:]' '[:lower:]')
-    BUILD_DATE=$(date -u +%Y%m%d)
+    local goodir=$(echo $buildtype | tr '[:upper:]' '[:lower:]')
+    local build_date=$(date -u +%Y%m%d)
+    local local_zip_path
+    local remote_zip_path
     case $buildtype in
         AOKP)
             # AOKP is annoying about naming its builds
@@ -395,11 +422,11 @@ function upload()
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM9)
-            local_zip_path=out/target/product/$DEVICE/cm-9-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM7)
-            local_zip_path=out/target/product/$DEVICE/cm-7-$BUILD_DATE-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         *) error "Not a valid build type!\n";;
@@ -426,20 +453,6 @@ function sync()
     repo sync -j$DLJOBS -f -d
 }
 
-function timer()
-{
-    END_TIME=$(date +%s)
-    ELAPSED=$((END_TIME - START_TIME))
-    E_HR=$((ELAPSED / 60 / 60))
-    E_MIN=$(((ELAPSED / 60) % 60))
-    E_SEC=$((ELAPSED % 60))
-
-    printf "Elapsed Time: " | color yellow
-    [ $E_HR != 0 ]  && printf "%d hr(s) "  $E_HR  | color yellow
-    [ $E_MIN != 0 ] && printf "%d min(s) " $E_MIN | color yellow
-    printf "%d sec(s)\n" $E_SEC | color yellow
-}
-
 function update()
 {
     message "Removing "
@@ -447,9 +460,12 @@ function update()
     rm $ACIDIFY_DIR/acidify
     message "Fetching newest version from Github\n"
     curl https://raw.github.com/teamacid/acidify/master/acidify > $ACIDIFY_DIR/acidify
+    curl https://raw.github.com/teamacid/acidify/master/config.sample > $ACIDIFY_DIR/config.sample
     chmod +x $ACIDIFY_DIR/acidify
     message "Updated to "
     $ACIDIFY_DIR/acidify version
+    message "You should examine the new config.sample as well, to see if your\n" \
+            "config needs to be modified further to support new features."
 }
 
 function flash()
@@ -457,9 +473,9 @@ function flash()
     message "This will flash the latest boot image via heimdall\n"
     message "Make sure you're in download mode!\n"
     command -v heimdall >/dev/null 2>&1 || error "heimdall-cli is not installed, so flashing cannot continue.\n"
-    if [ -f "$RESDIR/out/target/product/$DEVICE/boot.img" ]; then
+    if [ -f "$ANDROID_ENV_DIR/out/target/product/$DEVICE/boot.img" ]; then
         message "Flashing boot image\n"
-        sudo heimdall flash --kernel "$RESDIR/out/target/product/$DEVICE/boot.img"
+        sudo heimdall flash --kernel "$ANDROID_ENV_DIR/out/target/product/$DEVICE/boot.img"
     else
         error "boot.img does not exist! You probably forgot to build it."
     fi
@@ -472,13 +488,14 @@ function usage()
     message "Commands:\n"
     message "\tsetup\t\tFetches required packages in additon to repo for building Android\n"
     message "\tinit\t\tInitializes the build environment to build the type specified in the argument\n"
+    message "\tsetenv\t\tSet configured Android build environment to the current working directory\n"
     message "\tconfig\t\tConfigures the build environment for $DEVICE\n"
-    message "\tbuild\t\tBuilds a build for the $DEVICE (same as mka bacon)\n"
+    message "\tbuild\t\tBuilds a build for the $DEVICE\n"
     message "\tclean\t\tCleans the build environment\n"
     message "\trelease\t\tCompiles a clean build for the $DEVICE\n"
     message "\tdeploy\t\tDeploys a new build to the device's SD card via adb\n"
     message "\tupload\t\tUploads the latest build to goo.im\n"
-    message "\tsync\t\tSyncs the latest changes from upstream (same as 'repo sync')\n"
+    message "\tsync\t\tSyncs the latest changes from upstream\n"
     message "\tupdate\t\tUpdate acidify to the latest and greatest\n"
     message "\tflash\t\tFlash the latest boot image via heimdall\n"
     message "\n\n"
@@ -498,11 +515,12 @@ function main()
 {
     version
 
-    mkdir -p $RESDIR/.acidify
+    mkdir -p ~/.acidify
 
     case $command in
         setup) setup;;
         init) init;;
+        setenv) setbuildpath;;
         config) config;;
         build) build;;
         release) release;;
@@ -520,16 +538,18 @@ function main()
 if [ x"${command}" = x"" ]; then
     usage
 fi
+
 if [ x"${ARCH}" != x"x86_64" ]; then
     error "Only 64-bit machines are supported!\n"
 fi
-if [ -f $RESDIR/.acidify/buildtype ]; then
-    buildtype=$(cat $RESDIR/.acidify/buildtype)
-else
-    setbuildtype "CM9" # CM9 is what is actively being developed. Let's make it the default.
+
+if [ -f $ANDROID_ENV_DIR/.acidify/buildtype ]; then
+    buildtype=$(cat $ANDROID_ENV_DIR/.acidify/buildtype)
 fi
+
 main
-if [ ! x"${command}" = x"version" -o x"${command}" = x"" ]; then
+
+if [ ! x"${command}" = x"version" -o x"${command}" = x"setenv" -o x"${command}" = x"top" -o x"${command}" = x"" ]; then
     timer
 fi
 

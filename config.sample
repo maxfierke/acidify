@@ -1,0 +1,18 @@
+## Acidify Config
+
+# Repo Configuration
+DLJOBS=${DLJOBS:-4}                         # number of concurrent downloads
+# Device Configuration
+MANUFACTURER=${MANUFACTURER:-samsung}       # device manufacturer
+DEVICE=${DEVICE:-galaxys4gmtd}              # device name used by the android build system
+MODEL=${MODEL:-sgh-t959v}                   # Used by TeamAcid, probably not needed elsewhere.
+# Local Manifest Configuration (these can be blank if you're not using local manifests)
+LM_AOKP=${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
+LM_CM7=${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
+LM_CM9=${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
+# User Configuration
+GOOUSER=${GOOUSER:-TeamAcid}
+# Build System Configuration (no trailing slash)
+ANDROID_ENV_DIR=${ANDROID_ENV_DIR:-/path/to/android/build/directory}
+## END CONFIGURATION
+
