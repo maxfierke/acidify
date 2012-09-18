@@ -327,7 +327,7 @@ function config()
     checkenv
     case $buildtype in
         AOKP) lunch aokp_$DEVICE-userdebug;;
-        CM9) lunch cm_$DEVICE-userdebug;;
+        CM9) lunch cm_$DEVICE-eng;;
         CM7) lunch cyanogen_$DEVICE-eng;;
         *) error "Invalid build type!\n";;
     esac
