@@ -139,7 +139,9 @@ function installreqpackages()
     case $DISTRIB_ID in
         Ubuntu|LinuxMint) aptgetreq;;
         *)
-            [[ -z "$DISTRIB_ID" ]] DISTRIB_ID="Your system"
+            if [ x"$DISTRIB_ID" = x"" ]; then 
+                DISTRIB_ID="Your system"
+            fi
             error "$DISTRIB_ID is unsupported by this script!\n" \
                   "Refer to the building Android guide for $DISTRIB_ID\n" \
                   "to determine what packages you need.\n"
