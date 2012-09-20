@@ -8,11 +8,6 @@ RELVERSION=1
 
 export PATH="~/bin:$PATH"
 
-
-# If ANDROID_ENV_DIR is defined, cd to it. It makes the script completely runnable from anywhere.
-if [ -z "$ANDROID_ENV_DIR" ]; then
-    cd $ANDROID_ENV_DIR
-fi
 # Start the timer
 START_TIME=$(date +%s)
 
@@ -141,8 +136,15 @@ function installreqpackages()
     esac
 }
 
+function gotoenv() {
+    if [ -z "$ANDROID_ENV_DIR" ]; then
+        cd $ANDROID_ENV_DIR
+    fi
+}
+
 function checkenv()
 {
+    gotoenv
     if [ -f $ANDROID_ENV_DIR/build/envsetup.sh ]; then
         command -v brunch >/dev/null 2>&1 || . $ANDROID_ENV_DIR/build/envsetup.sh
     else
@@ -152,6 +154,7 @@ function checkenv()
 
 function cleanenv()
 {
+    gotoenv
     if [ -f $ANDROID_ENV_DIR/build/envsetup.sh ]; then
         checkenv
         make clobber
@@ -159,7 +162,7 @@ function cleanenv()
     if [ -d $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE ]; then
         cd $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $ANDROID_ENV_DIR
+        gotoenv
     fi
     if [ -d $ANDROID_ENV_DIR/android ]; then
         message "Removing $ANDROID_ENV_DIR/android\n"
@@ -341,6 +344,7 @@ function build()
 
 function clean()
 {
+    gotoenv
     if [ -d $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE ]; then
         cd $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
@@ -357,6 +361,7 @@ function release()
 
 function deploy()
 {
+    gotoenv
     command -v adb >/dev/null 2>&1 || error "ADB is not installed and/or in your PATH, so I cannot deploy!\n"
     local build_date=$(date -u +%Y%m%d)
     local rm_zip_path
@@ -402,6 +407,7 @@ function deploy()
 
 function upload()
 {
+    gotoenv
     local goodir=$(echo $buildtype | tr '[:upper:]' '[:lower:]')
     local build_date=$(date -u +%Y%m%d)
     local local_zip_path
