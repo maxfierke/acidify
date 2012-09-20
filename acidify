@@ -555,7 +555,7 @@ fi
 
 main
 
-if [ ! x"${command}" = x"version" -o x"${command}" = x"setenv" -o x"${command}" = x"top" -o x"${command}" = x"" ]; then
+if [ ! x"${command}" = x"version" -o x"${command}" = x"setenv" -o x"${command}" = x"" ]; then
     timer
 fi
 
