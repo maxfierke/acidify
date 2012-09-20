@@ -378,17 +378,17 @@ function deploy()
             AOKP_BUILD=6
             device_build=$DEVICE"_milestone"
             rm_zip_path=/sdcard/aokp_$DEVICE*.zip
-            local_zip_path=out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
             remote_zip_path=/sdcard/aokp_$device_build-$AOKP_BUILD.zip
             ;;
         CM9)
             rm_zip_path=/sdcard/cm-9-*.zip
-            local_zip_path=out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=/sdcard/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
             ;;
         CM7)
             rm_zip_path=/sdcard/cm-7-*.zip
-            local_zip_path=out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=/sdcard/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
             ;;
         *) error "Not a valid build type!\n";;
@@ -422,15 +422,15 @@ function upload()
             # Someone that builds for AOKP should definitely fix this
             AOKP_BUILD=6
             device_build=$DEVICE"_milestone"
-            local_zip_path=out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/aokp_$device_build-$AOKP_BUILD.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM9)
-            local_zip_path=out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/cm-9-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         CM7)
-            local_zip_path=out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
+            local_zip_path=$ANDROID_ENV_DIR/out/target/product/$DEVICE/cm-7-$build_date-UNOFFICIAL-$DEVICE.zip
             remote_zip_path=$GOOUSER@upload.goo.im:/home/$GOOUSER/public_html/$goodir/
             ;;
         *) error "Not a valid build type!\n";;
