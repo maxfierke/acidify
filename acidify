@@ -233,7 +233,10 @@ function initrepo(){
         message "Initializing repository\n"
         repo init -u $init_repo_url -b $init_repo_branch
         sync
-        message "Starting all projects on task branch $init_repo_branch"
+        message "Starting all projects on task branch $init_repo_branch\n"
+        message "This may cause issues with projects using\nnon-standard" \ 
+                "branch names (typically kernel projects). Make sure you\n" \
+                "checkout the appropriate branch as needed.\n"
         repo start --all $init_repo_branch
     else
         error "You must supply all arguments to initrepo()\nPlease edit" \
@@ -246,6 +249,7 @@ function setbuildpath()
     local wd=`pwd`
     wd=${wd}
     sed -i "s%\(ANDROID_ENV_DIR *= *\$\x7BANDROID_ENV_DIR:-\).*%\1`pwd`\x7D%" ~/.acidify/config
+    message "Build environment set to `pwd`\n"
 }
 
 function timer()
