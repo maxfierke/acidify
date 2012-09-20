@@ -2,35 +2,9 @@
 
 set -e
 
-if [ -f ~/.acidify/config ]; then
-    source ~/.acidify/config
-else
-    echo -en "Warning: Could not load configuration file. Using environmental or program defaults.\n" | color yellow
-fi
-
-## DEFAULT CONFIGURATION - DO NOT MODIFY
-## Each of the following can be overridden in the environment.
-## They will also be overriden by the config file in ~/.acidify
-## For example. Override the DLJOBS with: DLJOBS=8 acidify
-# Repo Configuration
-DLJOBS=${DLJOBS:-4}             # number of concurrent downloads
-# Device Configuration
-MANUFACTURER=${MANUFACTURER:-samsung}
-DEVICE=${DEVICE:-galaxys4gmtd}
-MODEL=${MODEL:-sgh-t959v}
-# Local Manifest Configuration (these can be blank if you're not using local manifests)
-LM_AOKP=${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
-LM_CM7=${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
-LM_CM9=${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
-# User Configuration
-GOOUSER=${GOOUSER:-TeamAcid}
-# Build System Configuration
-ANDROID_ENV_DIR=${ANDROID_ENV_DIR:-${ANDROID_BUILD_TOP}}
-## END CONFIGURATION
-
 MAJVERSION=0
 MINVERSION=4
-RELVERSION=0
+RELVERSION=1
 
 export PATH="~/bin:$PATH"
 
@@ -51,6 +25,24 @@ command="${1}"
 arg="${2}"
 
 # Utility Functions
+
+function load_acidify_config() {
+    if [ -f ~/.acidify/config ]; then
+        source ~/.acidify/config
+    else
+        echo -en "Notice: Could not find configuration file. Using environmental or program defaults.\n" | color yellow
+    fi
+    DLJOBS=${DLJOBS:-4}
+    MANUFACTURER=${MANUFACTURER:-samsung}
+    DEVICE=${DEVICE:-galaxys4gmtd}
+    MODEL=${MODEL:-sgh-t959v}
+    LM_AOKP=${LM_AOKP:-"http://teamacid.github.com/manifests/$MODEL/AOKP/local_manifest.xml"}
+    LM_CM7=${LM_CM7:-"http://teamacid.github.com/manifests/$MODEL/CM7/local_manifest.xml"}
+    LM_CM9=${LM_CM9:-"http://teamacid.github.com/manifests/$MODEL/CM9/local_manifest.xml"}
+    GOOUSER=${GOOUSER:-TeamAcid}
+    ANDROID_ENV_DIR=${ANDROID_ENV_DIR:-${ANDROID_BUILD_TOP}}
+}
+
 function abort()
 {
     exit 1
@@ -536,6 +528,8 @@ function main()
         *) usage;;
     esac
 }
+
+load_acidify_config
 
 if [ x"${command}" = x"" ]; then
     usage
