@@ -21,7 +21,8 @@ arg="${2}"
 
 # Utility Functions
 
-function load_acidify_config() {
+function load_acidify_config() 
+{
     if [ -f ~/.acidify/config ]; then
         source ~/.acidify/config
     else
@@ -454,7 +455,7 @@ function sync()
 {
     getlocalmanifest
     message "Syncing $buildtype changes with upstream\n"
-    repo sync -j$DLJOBS -f -d
+    repo sync -j$DLJOBS -d
 }
 
 function update()
