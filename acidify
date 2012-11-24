@@ -349,12 +349,11 @@ function build()
 
 function clean()
 {
-    gotoenv
     if [ -d $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE ]; then
         cd $ANDROID_ENV_DIR/kernel/$MANUFACTURER/$DEVICE
         make distclean
-        cd $ANDROID_ENV_DIR
     fi
+    gotoenv
     make clobber
 }
 
