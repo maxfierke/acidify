@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+#   Acidify
+#   Author: Max Fierke
+#   License: GNU General Public License version 3
+#   Copyright (c) 2012 Max Fierke
+
+import argparse
+import sys
+import os
+import yaml         # used for reading acidify recipes
+
+from colorama import init, Fore, Back, Style
+init()
+
+MAJVERSION = 1
+MINVERSION = 0
+RELVERSION = 0
+
+TIMER_START = None
+
+home = os.path.expanduser("~")
+acidify_self = inspect.getfile(inspect.currentframe())
+
+def message(text):
+    print(Fore.YELLOW+text+'\n'+Fore.RESET)
+def error(text):
+    print(Fore.RED+text+'\n'+Fore.RESET)
+
+def main():
+    if platform.machine() != 'x86_64':
+        error('Acidify only supports 64-bit!')
+        return 1
+    versionstr = 'Acidify version '+str(MAJVERSION)+"."+str(MINVERSION)+"."+str(RELVERSION)
+    parser = argparse.ArgumentParser(prog='acidify', description='A tool for configuring, building, and deploying Android.')
+    parser.add_argument('--config', metavar='PATH', nargs=1, help='path to a predefined configuration file')
+    parser.add_argument('--device', nargs=1, help='device Android will be built for')
+    parser.add_argument('--manufacturer', nargs=1, help='manufacturer of the device')
+    parser.add_argument('--env', metavar='PATH', nargs=1, help='path to Android build environment')
+    parser.add_argument('--manifest', metavar='URL', nargs=1, help='url of the local manifest to be used')
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    parser_setup = subparsers.add_parser('setup', help='installs required dependencies for builing Android (supported platforms only)')
+    parser_init = subparsers.add_parser('init', help='initializes the current working directory as an Android build environment')
+    parser_config = subparsers.add_parser('config', help='configures the current Android build environment')
+    parser_config.add_argument('buildtype')
+    parser_build = subparsers.add_parser('build', help='builds Android')
+    parser_clean = subparsers.add_parser('clean', help='cleans the Android build environment')
+    parser_deploy = subparsers.add_parser('deploy', help='deploys a compiled Android build to a device via ADB')
+    parser_flash = subparsers.add_parser('flash', help='flashes a compiled Android image')
+    parser_upload = subparsers.add_parser('upload', help='uploads the most recently compiled build to goo.im')
+    parser_sync = subparsers.add_parser('sync', help='pulls the latest source code')
+    parser_update = subparsers.add_parser('update', help='checks for updates to acidify')
+    parser_version = subparsers.add_parser('version', help='displays acidify\'s version')
+
+    try:
+        os.mkdir(home+"/.acidify");
+    except OSError: # Folder already exists. Be cool Honeybunny.
+        pass
+
+    exit(0)
+
+def version():
+    message("Acidify version "+str(MAJVERSION)+"."+str(MINVERSION)+"."+str(RELVERSION))
+
+if __name__ == "__main__":
+    main()
