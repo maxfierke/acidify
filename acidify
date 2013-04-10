@@ -49,7 +49,7 @@ def load_host_recipe():
 def main():
     if platform.machine() != 'x86_64':
         error('Acidify only supports 64-bit!')
-        return 1
+        return errno.EPERM
     versionstr = 'Acidify version '+str(MAJVERSION)+"."+str(MINVERSION)+"."+str(RELVERSION)
     parser = argparse.ArgumentParser(prog='acidify', description='A tool for configuring, building, and deploying Android.')
     parser.add_argument('--config', metavar='PATH', nargs=1, help='path to a predefined configuration file')
