@@ -74,8 +74,8 @@ def main():
     parser_version = subparsers.add_parser('version', help='displays acidify\'s version')
 
     try:
-        os.mkdir(home+"/.acidify");
-    except OSError: # Folder already exists. Be cool Honeybunny.
+        os.mkdir(home+"/.acidify")
+    except OSError:  # Folder already exists. Be cool Honeybunny.
         pass
 
     exit(0)
